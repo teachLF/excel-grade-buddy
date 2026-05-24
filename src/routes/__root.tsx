@@ -73,14 +73,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "BODOR" },
+      { name: "description", content: "Student Status Tracker allows educators to manage student attendance and status efficiently." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "BODOR" },
+      { property: "og:description", content: "Student Status Tracker allows educators to manage student attendance and status efficiently." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "BODOR" },
+      { name: "twitter:description", content: "Student Status Tracker allows educators to manage student attendance and status efficiently." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6f5cbaf0-ac6f-4be6-9132-74dfa90b8c41/id-preview-3a3dda0f--23984e3f-bc27-48de-8156-373e378e4141.lovable.app-1779643555587.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6f5cbaf0-ac6f-4be6-9132-74dfa90b8c41/id-preview-3a3dda0f--23984e3f-bc27-48de-8156-373e378e4141.lovable.app-1779643555587.png" },
     ],
     links: [
       {
