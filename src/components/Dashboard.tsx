@@ -62,9 +62,9 @@ export function Dashboard() {
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf);
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { header: 1 });
+      const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: "" });
       const names: string[] = [];
-      for (const row of rows as unknown[][]) {
+      for (const row of rows) {
         for (const cell of row) {
           const v = String(cell ?? "").trim();
           if (v) {
