@@ -530,13 +530,13 @@ export function ClassPage({ classId }: { classId: string }) {
             </div>
             <div className="flex rounded-md border overflow-hidden">
               <button
-                onClick={() => setVoiceMode("absent")}
+                onClick={() => { setVoiceMode("absent"); processedKeys.clear(); }}
                 className={`px-3 py-1 text-xs ${voiceMode === "absent" ? "bg-rose-500 text-white" : "bg-background"}`}
               >
                 تغييب
               </button>
               <button
-                onClick={() => setVoiceMode("present")}
+                onClick={() => { setVoiceMode("present"); processedKeys.clear(); }}
                 className={`px-3 py-1 text-xs ${voiceMode === "present" ? "bg-emerald-500 text-white" : "bg-background"}`}
               >
                 تحضير
