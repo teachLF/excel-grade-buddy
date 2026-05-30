@@ -66,9 +66,46 @@ function normalizeArabic(s: string) {
     .replace(/ؤ/g, "و")
     .replace(/ئ/g, "ي")
     .replace(/ة/g, "ه")
+    .replace(/[^\u0600-\u06FF\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim()
     .toLowerCase();
+}
+
+// Levenshtein distance for fuzzy match tolerance
+function lev(a: string, b: string) {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  const dp = Array.from({ length: a.length + 1 }, (_, i) => i);
+  for (let j = 1; j <= b.length; j++) {
+    let prev = dp[0];
+    dp[0] = j;
+    for (let i = 1; i <= a.length; i++) {
+      const tmp = dp[i];
+      dp[i] = Math.min(
+        dp[i] + 1,
+        dp[i - 1] + 1,
+        prev + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );
+      prev = tmp;
+    }
+  }
+  return dp[a.length];
+}
+
+function tokenMatches(token: string, namePart: string) {
+  if (token === namePart) return true;
+  if (namePart.length >= 4 && token.length >= 4) {
+    if (token.includes(namePart) || namePart.includes(token)) return true;
+    const d = lev(token, namePart);
+    const maxLen = Math.max(token.length, namePart.length);
+    if (d <= 1) return true;
+    if (maxLen >= 6 && d <= 2) return true;
+  } else if (namePart.length >= 3 && token === namePart) {
+    return true;
+  }
+  return false;
 }
 
 function eventLabel(t: string) {
@@ -106,6 +143,8 @@ export function ClassPage({ classId }: { classId: string }) {
   const [transcript, setTranscript] = useState("");
   const [lastMatched, setLastMatched] = useState<string>("");
   const [recognition, setRecognition] = useState<any>(null);
+  // Track processed transcript fragments to avoid duplicates within one session
+  const [processedKeys] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -249,7 +288,7 @@ export function ClassPage({ classId }: { classId: string }) {
         }
       }
       setTranscript(interim || finalText);
-      if (finalText) tryMatchName(finalText);
+      if (finalText) tryMatchNames(finalText);
     };
 
     rec.onerror = (e: any) => {
@@ -295,34 +334,87 @@ export function ClassPage({ classId }: { classId: string }) {
     setTranscript("");
   };
 
-  const tryMatchName = (text: string) => {
+  const speakQueue = (texts: string[]) => {
+    try {
+      window.speechSynthesis.cancel();
+      for (const t of texts) {
+        const u = new SpeechSynthesisUtterance(t);
+        u.lang = "ar-SA";
+        u.rate = 1.05;
+        window.speechSynthesis.speak(u);
+      }
+    } catch {
+      /* ignore */
+    }
+  };
+
+  // Match ALL students mentioned in the transcript (supports rapid-fire names)
+  const tryMatchNames = (text: string) => {
     const norm = normalizeArabic(text);
     if (!norm) return;
-    // Find best matching student: longest name that appears in transcript
-    let best: Student | null = null;
-    let bestLen = 0;
-    for (const s of students) {
+    const tokens = norm.split(" ").filter((t) => t.length >= 2);
+    if (tokens.length === 0) return;
+
+    // Build candidate list with first-name parts
+    const candidates = students.map((s) => {
       const n = normalizeArabic(s.name);
-      if (!n) continue;
       const parts = n.split(" ").filter((p) => p.length >= 2);
-      // Match if full normalized name appears OR all name parts appear
-      const fullHit = n.length >= 2 && norm.includes(n);
-      const partsHit =
-        parts.length > 0 && parts.every((p) => norm.includes(p));
-      if (fullHit || partsHit) {
-        if (n.length > bestLen) {
-          best = s;
-          bestLen = n.length;
+      return { student: s, parts, first: parts[0] ?? n };
+    });
+
+    const matchedIds = new Set<string>();
+    const matchedStudents: Student[] = [];
+
+    // Try each token (and 2-token windows) against student first names
+    for (let i = 0; i < tokens.length; i++) {
+      const t1 = tokens[i];
+      const t2 = i + 1 < tokens.length ? tokens[i + 1] : "";
+
+      for (const c of candidates) {
+        if (matchedIds.has(c.student.id)) continue;
+        const first = c.first;
+        if (!first) continue;
+
+        let hit = false;
+        // single-token fuzzy match on first name
+        if (tokenMatches(t1, first)) hit = true;
+        // two-token concat (some recognizers split names)
+        if (!hit && t2 && tokenMatches(t1 + t2, first)) hit = true;
+        // also try matching any of the name parts (e.g. last name only)
+        if (!hit) {
+          for (const p of c.parts) {
+            if (tokenMatches(t1, p)) {
+              hit = true;
+              break;
+            }
+          }
+        }
+        if (hit) {
+          matchedIds.add(c.student.id);
+          matchedStudents.push(c.student);
         }
       }
     }
-    if (best) {
-      const current = attendanceFor(best.id);
-      if (current === voiceMode) return; // already marked
-      setLastMatched(best.name);
-      addEvent(best, voiceMode, true);
-      const verb = voiceMode === "absent" ? "تم تغييب الطالب" : "تم تحضير الطالب";
-      speak(`${verb} ${best.name}`);
+
+    if (matchedStudents.length === 0) return;
+
+    const phrases: string[] = [];
+    const namesForToast: string[] = [];
+    for (const st of matchedStudents) {
+      const key = `${st.id}:${voiceMode}`;
+      if (processedKeys.has(key)) continue; // already handled this session
+      const current = attendanceFor(st.id);
+      if (current !== voiceMode) {
+        addEvent(st, voiceMode, true);
+      }
+      processedKeys.add(key);
+      namesForToast.push(st.name);
+      const verb = voiceMode === "absent" ? "تم تغييب" : "تم تحضير";
+      phrases.push(`${verb} ${st.name}`);
+    }
+    if (namesForToast.length > 0) {
+      setLastMatched(namesForToast.join("، "));
+      speakQueue(phrases);
     }
   };
 
