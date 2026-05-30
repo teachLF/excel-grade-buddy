@@ -348,21 +348,19 @@ export function ClassPage({ classId }: { classId: string }) {
 
   // ---------- Export ----------
   const exportXlsx = () => {
-    const rows = students.map((s, i) => ({
-      "#": i + 1,
-      "اسم الطالب": s.name,
-      "الحضور": ATTENDANCE[attendanceFor(s.id) ?? "present"]
-        ? attendanceFor(s.id) === "present"
-          ? "حاضر"
-          : attendanceFor(s.id) === "absent"
-            ? "غائب"
-            : ""
-        : "",
-      "نجمة": countsFor(s.id).star ?? 0,
-      "مشاغب": countsFor(s.id).escaped ?? 0,
-      "نائم": countsFor(s.id).sleeping ?? 0,
-      "يتحدث": countsFor(s.id).talking ?? 0,
-    }));
+    const rows = students.map((s, i) => {
+      const att = attendanceFor(s.id);
+      const c = countsFor(s.id);
+      return {
+        "#": i + 1,
+        "اسم الطالب": s.name,
+        "الحضور": att ? ATTENDANCE[att].label : "",
+        "نجمة": c.star ?? 0,
+        "مشاغب": c.escaped ?? 0,
+        "نائم": c.sleeping ?? 0,
+        "يتحدث": c.talking ?? 0,
+      };
+    });
     const ws = XLSX.utils.json_to_sheet(rows);
     ws["!cols"] = [
       { wch: 5 },
