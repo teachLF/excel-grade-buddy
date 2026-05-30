@@ -314,6 +314,7 @@ export function ClassPage({ classId }: { classId: string }) {
       rec.start();
       setRecognition(rec);
       setListening(true);
+      processedKeys.clear();
       toast.success("الميكروفون مفعّل - انطق اسم الطالب");
     } catch {
       toast.error("تعذّر بدء الاستماع");
@@ -332,6 +333,7 @@ export function ClassPage({ classId }: { classId: string }) {
     setRecognition(null);
     setListening(false);
     setTranscript("");
+    processedKeys.clear();
   };
 
   const speakQueue = (texts: string[]) => {
