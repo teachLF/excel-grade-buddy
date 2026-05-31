@@ -228,6 +228,7 @@ export function ClassPage({ classId }: { classId: string }) {
       event_type: type,
       created_at: new Date().toISOString(),
     };
+    eventsRef.current = [optimistic, ...eventsRef.current];
     setEvents((p) => [optimistic, ...p]);
     const { data, error } = await supabase
       .from("student_events")
@@ -239,11 +240,13 @@ export function ClassPage({ classId }: { classId: string }) {
       .select()
       .single();
     if (error) {
+      eventsRef.current = eventsRef.current.filter((e) => e.id !== tempId);
       setEvents((p) => p.filter((e) => e.id !== tempId));
       if (!silent) toast.error(error.message);
       return;
     }
     if (data) {
+      eventsRef.current = eventsRef.current.map((e) => (e.id === tempId ? (data as StudentEvent) : e));
       setEvents((p) => p.map((e) => (e.id === tempId ? (data as StudentEvent) : e)));
     }
   };
