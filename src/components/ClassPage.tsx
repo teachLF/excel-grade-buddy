@@ -148,6 +148,21 @@ export function ClassPage({ classId }: { classId: string }) {
   const [recognition, setRecognition] = useState<any>(null);
   // Track processed transcript fragments to avoid duplicates within one session
   const [processedKeys] = useState<Set<string>>(() => new Set());
+  const studentsRef = useRef<Student[]>([]);
+  const eventsRef = useRef<StudentEvent[]>([]);
+  const voiceModeRef = useRef<"absent" | "present">("absent");
+
+  useEffect(() => {
+    studentsRef.current = students;
+  }, [students]);
+
+  useEffect(() => {
+    eventsRef.current = events;
+  }, [events]);
+
+  useEffect(() => {
+    voiceModeRef.current = voiceMode;
+  }, [voiceMode]);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
