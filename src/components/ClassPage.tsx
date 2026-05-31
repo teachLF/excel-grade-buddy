@@ -308,8 +308,9 @@ export function ClassPage({ classId }: { classId: string }) {
           interim += r[0].transcript;
         }
       }
-      setTranscript(interim || finalText);
-      if (finalText) tryMatchNames(finalText);
+      const heardText = `${finalText} ${interim}`.trim();
+      setTranscript(heardText);
+      if (heardText) tryMatchNames(heardText);
     };
 
     rec.onerror = (e: any) => {
@@ -379,7 +380,8 @@ export function ClassPage({ classId }: { classId: string }) {
     if (tokens.length === 0) return;
 
     // Build candidate list with first-name parts
-    const candidates = students.map((s) => {
+    const activeVoiceMode = voiceModeRef.current;
+    const candidates = studentsRef.current.map((s) => {
       const n = normalizeArabic(s.name);
       const parts = n.split(" ").filter((p) => p.length >= 2);
       return { student: s, parts, first: parts[0] ?? n };
@@ -424,15 +426,15 @@ export function ClassPage({ classId }: { classId: string }) {
     const phrases: string[] = [];
     const namesForToast: string[] = [];
     for (const st of matchedStudents) {
-      const key = `${st.id}:${voiceMode}`;
+      const key = `${st.id}:${activeVoiceMode}`;
       if (processedKeys.has(key)) continue; // already handled this session
       const current = attendanceFor(st.id);
-      if (current !== voiceMode) {
-        addEvent(st, voiceMode, true);
+      if (current !== activeVoiceMode) {
+        addEvent(st, activeVoiceMode, true);
       }
       processedKeys.add(key);
       namesForToast.push(st.name);
-      const verb = voiceMode === "absent" ? "تم تغييب" : "تم تحضير";
+      const verb = activeVoiceMode === "absent" ? "تم تغييب" : "تم تحضير";
       phrases.push(`${verb} ${st.name}`);
     }
     if (namesForToast.length > 0) {
