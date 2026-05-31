@@ -210,7 +210,7 @@ export function ClassPage({ classId }: { classId: string }) {
   };
 
   const attendanceFor = (studentId: string): "present" | "absent" | null => {
-    for (const e of events) {
+    for (const e of eventsRef.current) {
       if (e.student_id === studentId) {
         if (e.event_type === "present" || e.event_type === "absent")
           return e.event_type;
