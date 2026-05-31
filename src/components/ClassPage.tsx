@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import * as XLSX from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
@@ -96,6 +96,9 @@ function lev(a: string, b: string) {
 
 function tokenMatches(token: string, namePart: string) {
   if (token === namePart) return true;
+  if (token.length >= 2 && namePart.length >= 2) {
+    if (token.startsWith(namePart) || namePart.startsWith(token)) return true;
+  }
   if (namePart.length >= 4 && token.length >= 4) {
     if (token.includes(namePart) || namePart.includes(token)) return true;
     const d = lev(token, namePart);
