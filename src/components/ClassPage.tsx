@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import * as XLSX from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,11 +83,7 @@ function lev(a: string, b: string) {
     dp[0] = j;
     for (let i = 1; i <= a.length; i++) {
       const tmp = dp[i];
-      dp[i] = Math.min(
-        dp[i] + 1,
-        dp[i - 1] + 1,
-        prev + (a[i - 1] === b[j - 1] ? 0 : 1)
-      );
+      dp[i] = Math.min(dp[i] + 1, dp[i - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
       prev = tmp;
     }
   }
@@ -96,6 +92,9 @@ function lev(a: string, b: string) {
 
 function tokenMatches(token: string, namePart: string) {
   if (token === namePart) return true;
+  if (token.length >= 2 && namePart.length >= 2) {
+    if (token.startsWith(namePart) || namePart.startsWith(token)) return true;
+  }
   if (namePart.length >= 4 && token.length >= 4) {
     if (token.includes(namePart) || namePart.includes(token)) return true;
     const d = lev(token, namePart);
@@ -110,9 +109,7 @@ function tokenMatches(token: string, namePart: string) {
 
 function eventLabel(t: string) {
   return (
-    STATUSES.find((s) => s.key === t)?.label ??
-    ATTENDANCE[t as keyof typeof ATTENDANCE]?.label ??
-    t
+    STATUSES.find((s) => s.key === t)?.label ?? ATTENDANCE[t as keyof typeof ATTENDANCE]?.label ?? t
   );
 }
 
@@ -145,6 +142,21 @@ export function ClassPage({ classId }: { classId: string }) {
   const [recognition, setRecognition] = useState<any>(null);
   // Track processed transcript fragments to avoid duplicates within one session
   const [processedKeys] = useState<Set<string>>(() => new Set());
+  const studentsRef = useRef<Student[]>([]);
+  const eventsRef = useRef<StudentEvent[]>([]);
+  const voiceModeRef = useRef<"absent" | "present">("absent");
+
+  useEffect(() => {
+    studentsRef.current = students;
+  }, [students]);
+
+  useEffect(() => {
+    eventsRef.current = events;
+  }, [events]);
+
+  useEffect(() => {
+    voiceModeRef.current = voiceMode;
+  }, [voiceMode]);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -192,10 +204,9 @@ export function ClassPage({ classId }: { classId: string }) {
   };
 
   const attendanceFor = (studentId: string): "present" | "absent" | null => {
-    for (const e of events) {
+    for (const e of eventsRef.current) {
       if (e.student_id === studentId) {
-        if (e.event_type === "present" || e.event_type === "absent")
-          return e.event_type;
+        if (e.event_type === "present" || e.event_type === "absent") return e.event_type;
       }
     }
     return null;
@@ -210,6 +221,7 @@ export function ClassPage({ classId }: { classId: string }) {
       event_type: type,
       created_at: new Date().toISOString(),
     };
+    eventsRef.current = [optimistic, ...eventsRef.current];
     setEvents((p) => [optimistic, ...p]);
     const { data, error } = await supabase
       .from("student_events")
@@ -221,11 +233,15 @@ export function ClassPage({ classId }: { classId: string }) {
       .select()
       .single();
     if (error) {
+      eventsRef.current = eventsRef.current.filter((e) => e.id !== tempId);
       setEvents((p) => p.filter((e) => e.id !== tempId));
       if (!silent) toast.error(error.message);
       return;
     }
     if (data) {
+      eventsRef.current = eventsRef.current.map((e) =>
+        e.id === tempId ? (data as StudentEvent) : e,
+      );
       setEvents((p) => p.map((e) => (e.id === tempId ? (data as StudentEvent) : e)));
     }
   };
@@ -263,9 +279,7 @@ export function ClassPage({ classId }: { classId: string }) {
 
   // ---------- Voice attendance ----------
   const startListening = () => {
-    const SR =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) {
       toast.error("المتصفح لا يدعم التعرف الصوتي. جرّب Chrome.");
       return;
@@ -287,8 +301,9 @@ export function ClassPage({ classId }: { classId: string }) {
           interim += r[0].transcript;
         }
       }
-      setTranscript(interim || finalText);
-      if (finalText) tryMatchNames(finalText);
+      const heardText = `${finalText} ${interim}`.trim();
+      setTranscript(heardText);
+      if (heardText) tryMatchNames(heardText);
     };
 
     rec.onerror = (e: any) => {
@@ -358,7 +373,8 @@ export function ClassPage({ classId }: { classId: string }) {
     if (tokens.length === 0) return;
 
     // Build candidate list with first-name parts
-    const candidates = students.map((s) => {
+    const activeVoiceMode = voiceModeRef.current;
+    const candidates = studentsRef.current.map((s) => {
       const n = normalizeArabic(s.name);
       const parts = n.split(" ").filter((p) => p.length >= 2);
       return { student: s, parts, first: parts[0] ?? n };
@@ -403,15 +419,15 @@ export function ClassPage({ classId }: { classId: string }) {
     const phrases: string[] = [];
     const namesForToast: string[] = [];
     for (const st of matchedStudents) {
-      const key = `${st.id}:${voiceMode}`;
+      const key = `${st.id}:${activeVoiceMode}`;
       if (processedKeys.has(key)) continue; // already handled this session
       const current = attendanceFor(st.id);
-      if (current !== voiceMode) {
-        addEvent(st, voiceMode, true);
+      if (current !== activeVoiceMode) {
+        addEvent(st, activeVoiceMode, true);
       }
       processedKeys.add(key);
       namesForToast.push(st.name);
-      const verb = voiceMode === "absent" ? "تم تغييب" : "تم تحضير";
+      const verb = activeVoiceMode === "absent" ? "تم تغييب" : "تم تحضير";
       phrases.push(`${verb} ${st.name}`);
     }
     if (namesForToast.length > 0) {
@@ -448,11 +464,11 @@ export function ClassPage({ classId }: { classId: string }) {
       return {
         "#": i + 1,
         "اسم الطالب": s.name,
-        "الحضور": att ? ATTENDANCE[att].label : "",
-        "نجمة": c.star ?? 0,
-        "مشاغب": c.escaped ?? 0,
-        "نائم": c.sleeping ?? 0,
-        "يتحدث": c.talking ?? 0,
+        الحضور: att ? ATTENDANCE[att].label : "",
+        نجمة: c.star ?? 0,
+        مشاغب: c.escaped ?? 0,
+        نائم: c.sleeping ?? 0,
+        يتحدث: c.talking ?? 0,
       };
     });
     const ws = XLSX.utils.json_to_sheet(rows);
@@ -530,13 +546,19 @@ export function ClassPage({ classId }: { classId: string }) {
             </div>
             <div className="flex rounded-md border overflow-hidden">
               <button
-                onClick={() => { setVoiceMode("absent"); processedKeys.clear(); }}
+                onClick={() => {
+                  setVoiceMode("absent");
+                  processedKeys.clear();
+                }}
                 className={`px-3 py-1 text-xs ${voiceMode === "absent" ? "bg-rose-500 text-white" : "bg-background"}`}
               >
                 تغييب
               </button>
               <button
-                onClick={() => { setVoiceMode("present"); processedKeys.clear(); }}
+                onClick={() => {
+                  setVoiceMode("present");
+                  processedKeys.clear();
+                }}
                 className={`px-3 py-1 text-xs ${voiceMode === "present" ? "bg-emerald-500 text-white" : "bg-background"}`}
               >
                 تحضير
@@ -563,13 +585,10 @@ export function ClassPage({ classId }: { classId: string }) {
                 <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                 <span className="text-muted-foreground">يستمع...</span>
               </div>
-              {transcript && (
-                <div className="text-foreground truncate">"{transcript}"</div>
-              )}
+              {transcript && <div className="text-foreground truncate">"{transcript}"</div>}
               {lastMatched && (
                 <div className="text-emerald-600 flex items-center gap-1">
-                  <Check className="h-3 w-3" /> آخر طالب:{" "}
-                  <b>{lastMatched}</b>
+                  <Check className="h-3 w-3" /> آخر طالب: <b>{lastMatched}</b>
                 </div>
               )}
             </div>
@@ -593,9 +612,7 @@ export function ClassPage({ classId }: { classId: string }) {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-muted-foreground w-6 text-center">
-                    {i + 1}
-                  </span>
+                  <span className="text-sm text-muted-foreground w-6 text-center">{i + 1}</span>
                   <div className="flex-1 min-w-0">
                     <div className="font-medium truncate">{s.name}</div>
                     {att && (
@@ -618,11 +635,7 @@ export function ClassPage({ classId }: { classId: string }) {
                   >
                     <History className="h-4 w-4 text-muted-foreground" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeStudent(s.id)}
-                  >
+                  <Button variant="ghost" size="icon" onClick={() => removeStudent(s.id)}>
                     <Trash2 className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </div>
@@ -675,9 +688,7 @@ export function ClassPage({ classId }: { classId: string }) {
             );
           })}
           {students.length === 0 && (
-            <Card className="p-8 text-center text-muted-foreground">
-              لا يوجد طلاب في هذا الفصل
-            </Card>
+            <Card className="p-8 text-center text-muted-foreground">لا يوجد طلاب في هذا الفصل</Card>
           )}
         </div>
       </main>
@@ -713,11 +724,7 @@ export function ClassPage({ classId }: { classId: string }) {
                         })}
                       </span>
                     </div>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => deleteEvent(e.id)}
-                    >
+                    <Button size="icon" variant="ghost" onClick={() => deleteEvent(e.id)}>
                       <X className="h-4 w-4 text-muted-foreground" />
                     </Button>
                   </div>
