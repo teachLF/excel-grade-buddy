@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
+import { Chrome } from "lucide-react";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -37,6 +39,23 @@ export function LoginPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
+      navigate({ to: "/" });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "حدث خطأ";
+      toast.error(msg);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    setBusy(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) throw result.error;
+      if (result.redirected) return;
       navigate({ to: "/" });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "حدث خطأ";
@@ -81,6 +100,27 @@ export function LoginPage() {
             {busy ? "..." : mode === "signin" ? "دخول" : "إنشاء حساب"}
           </Button>
         </form>
+
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">أو</span>
+          </div>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          disabled={busy}
+          onClick={signInWithGoogle}
+        >
+          <Chrome className="ml-2 h-4 w-4" />
+          الدخول بحساب Google
+        </Button>
+
         <button
           type="button"
           onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
