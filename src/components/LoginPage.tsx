@@ -48,6 +48,23 @@ export function LoginPage() {
     }
   };
 
+  const signInWithGoogle = async () => {
+    setBusy(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) throw result.error;
+      if (result.redirected) return;
+      navigate({ to: "/" });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "حدث خطأ";
+      toast.error(msg);
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
       <Card className="w-full max-w-md p-8">
