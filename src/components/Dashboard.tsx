@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, Plus, Upload, Trash2, Users } from "lucide-react";
+import { LogOut, Plus, Upload, Trash2, Users, Shield, Hourglass } from "lucide-react";
 
 type ClassRow = { id: string; name: string; created_at: string };
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, loading, approved, isAdmin, refreshProfile } = useAuth();
   const [classes, setClasses] = useState<ClassRow[]>([]);
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -33,8 +33,8 @@ export function Dashboard() {
   };
 
   useEffect(() => {
-    if (user) load();
-  }, [user]);
+    if (user && approved) load();
+  }, [user, approved]);
 
   const createClass = async () => {
     if (!newName.trim() || !user) return;
@@ -117,6 +117,34 @@ export function Dashboard() {
     return <div className="min-h-screen flex items-center justify-center">...</div>;
   }
 
+  if (!approved) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
+        <Card className="max-w-md w-full p-8 text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="rounded-full bg-muted p-4">
+              <Hourglass className="h-8 w-8 text-muted-foreground" />
+            </div>
+          </div>
+          <h1 className="text-xl font-bold">بانتظار موافقة المسؤول</h1>
+          <p className="text-sm text-muted-foreground">
+            تم إنشاء حسابك بنجاح. لن تتمكن من استخدام التطبيق حتى يوافق المسؤول
+            على حسابك. الرجاء المحاولة لاحقاً.
+          </p>
+          <p className="text-xs text-muted-foreground">{user.email}</p>
+          <div className="flex gap-2 justify-center">
+            <Button variant="outline" size="sm" onClick={refreshProfile}>
+              تحديث الحالة
+            </Button>
+            <Button variant="ghost" size="sm" onClick={logout}>
+              <LogOut className="h-4 w-4 ml-1" /> خروج
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="border-b bg-background">
@@ -125,9 +153,18 @@ export function Dashboard() {
             <h1 className="text-xl font-bold">متابعة الطلاب</h1>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
-          <Button variant="ghost" size="sm" onClick={logout}>
-            <LogOut className="h-4 w-4 ml-1" /> خروج
-          </Button>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/admin">
+                  <Shield className="h-4 w-4 ml-1" /> لوحة المسؤول
+                </Link>
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={logout}>
+              <LogOut className="h-4 w-4 ml-1" /> خروج
+            </Button>
+          </div>
         </div>
       </header>
 
