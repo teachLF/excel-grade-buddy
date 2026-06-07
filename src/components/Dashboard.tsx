@@ -127,16 +127,18 @@ export function Dashboard() {
             <h1 className="text-xl font-bold">متابعة الطلاب</h1>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
-          <Button variant="ghost" size="sm" onClick={logout}>
-            <LogOut className="h-4 w-4 ml-1" /> خروج
-          </Button>
-          {isAdmin && (
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/admin">
-                <Shield className="h-4 w-4 ml-1" /> لوحة المسؤول
-              </Link>
+          <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/admin">
+                  <Shield className="h-4 w-4 ml-1" /> لوحة المسؤول
+                </Link>
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={logout}>
+              <LogOut className="h-4 w-4 ml-1" /> خروج
             </Button>
-          )}
+          </div>
         </div>
       </header>
 
