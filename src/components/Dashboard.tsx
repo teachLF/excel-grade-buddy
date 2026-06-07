@@ -3,17 +3,19 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import * as XLSX from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, Plus, Upload, Trash2, Users } from "lucide-react";
+import { LogOut, Plus, Upload, Trash2, Users, Shield } from "lucide-react";
 
 type ClassRow = { id: string; name: string; created_at: string };
 
 export function Dashboard() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const [classes, setClasses] = useState<ClassRow[]>([]);
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -128,6 +130,13 @@ export function Dashboard() {
           <Button variant="ghost" size="sm" onClick={logout}>
             <LogOut className="h-4 w-4 ml-1" /> خروج
           </Button>
+          {isAdmin && (
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/admin">
+                <Shield className="h-4 w-4 ml-1" /> لوحة المسؤول
+              </Link>
+            </Button>
+          )}
         </div>
       </header>
 
