@@ -19,11 +19,28 @@ export function Dashboard() {
   const [classes, setClasses] = useState<ClassRow[]>([]);
   const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [approved, setApproved] = useState<boolean | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
   }, [loading, user, navigate]);
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("approved")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (active) setApproved(!!data?.approved);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [user]);
 
   const load = async () => {
     const { data, error } = await supabase
@@ -117,6 +134,27 @@ export function Dashboard() {
 
   if (loading || !user) {
     return <div className="min-h-screen flex items-center justify-center">...</div>;
+  }
+
+  if (approved === null) {
+    return <div className="min-h-screen flex items-center justify-center">...</div>;
+  }
+
+  if (!approved && !isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
+        <Card className="max-w-md w-full p-8 text-center space-y-4">
+          <h1 className="text-xl font-bold">حسابك قيد المراجعة</h1>
+          <p className="text-sm text-muted-foreground">
+            تم إنشاء حسابك بنجاح، لكن يحتاج موافقة المسؤول قبل استخدام التطبيق. سيتم تفعيله قريبًا.
+          </p>
+          <p className="text-xs text-muted-foreground" dir="ltr">{user.email}</p>
+          <Button variant="outline" onClick={logout} className="w-full">
+            <LogOut className="h-4 w-4 ml-1" /> تسجيل الخروج
+          </Button>
+        </Card>
+      </div>
+    );
   }
 
   return (
