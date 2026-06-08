@@ -565,6 +565,14 @@ export function ClassPage({ classId }: { classId: string }) {
   const absentCount = students.filter((s) => attendanceFor(s.id) === "absent").length;
   const totalStars = events.filter((e) => e.event_type === "star").length;
 
+  // Top student (by points) for the crown badge
+  const topStudentId =
+    students.length > 0
+      ? [...students]
+          .map((s) => ({ id: s.id, p: pointsFor(s.id, events) }))
+          .sort((a, b) => b.p - a.p)[0]
+      : null;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-background to-background">
       <header className="border-b bg-background/80 backdrop-blur sticky top-0 z-30">
