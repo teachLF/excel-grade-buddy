@@ -139,6 +139,8 @@ export function ClassPage({ classId }: { classId: string }) {
   const [events, setEvents] = useState<StudentEvent[]>([]);
   const [newName, setNewName] = useState("");
   const [historyFor, setHistoryFor] = useState<Student | null>(null);
+  const [notesFor, setNotesFor] = useState<Student | null>(null);
+  const [statsOpen, setStatsOpen] = useState(false);
 
   // Voice attendance
   const [listening, setListening] = useState(false);
