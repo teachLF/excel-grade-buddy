@@ -577,9 +577,29 @@ export function ClassPage({ classId }: { classId: string }) {
               {className}
             </h1>
           </div>
-          <Button onClick={exportXlsx} size="sm" disabled={students.length === 0}>
-            <Download className="h-4 w-4 ml-1" /> تصدير Excel
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Button
+              onClick={() => setStatsOpen(true)}
+              size="sm"
+              variant="outline"
+              disabled={students.length === 0}
+              title="الإحصائيات"
+            >
+              <BarChart3 className="h-4 w-4 ml-1" /> إحصائيات
+            </Button>
+            <Button
+              onClick={printPdf}
+              size="sm"
+              variant="outline"
+              disabled={students.length === 0}
+              title="طباعة / PDF"
+            >
+              <Printer className="h-4 w-4 ml-1" /> PDF
+            </Button>
+            <Button onClick={exportXlsx} size="sm" disabled={students.length === 0}>
+              <Download className="h-4 w-4 ml-1" /> Excel
+            </Button>
+          </div>
         </div>
         <div className="max-w-5xl mx-auto px-4 pb-3 flex flex-wrap gap-2 text-xs">
           <span className="px-2 py-1 rounded-full bg-muted">
