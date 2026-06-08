@@ -31,7 +31,13 @@ import {
   UserX,
   UserCheck,
   Sparkles,
+  BarChart3,
+  Printer,
+  StickyNote,
+  Trophy,
 } from "lucide-react";
+import { StudentNotesDialog } from "@/components/StudentNotesDialog";
+import { ClassStatsDialog, pointsFor } from "@/components/ClassStatsDialog";
 
 type Student = {
   id: string;
