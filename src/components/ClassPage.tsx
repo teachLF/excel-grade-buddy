@@ -713,7 +713,27 @@ export function ClassPage({ classId }: { classId: string }) {
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-muted-foreground w-6 text-center">{i + 1}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{s.name}</div>
+                    <div className="font-medium truncate flex items-center gap-1.5">
+                      {topStudentId?.id === s.id && topStudentId.p > 0 && (
+                        <Trophy className="h-4 w-4 text-amber-500 shrink-0" />
+                      )}
+                      <span className="truncate">{s.name}</span>
+                      {(() => {
+                        const pts = pointsFor(s.id, events);
+                        if (pts === 0) return null;
+                        return (
+                          <span
+                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
+                              pts > 0
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-rose-100 text-rose-700"
+                            }`}
+                          >
+                            {pts > 0 ? `+${pts}` : pts}
+                          </span>
+                        );
+                      })()}
+                    </div>
                     {att && (
                       <div
                         className={`text-xs flex items-center gap-1 mt-0.5 ${ATTENDANCE[att].color}`}
