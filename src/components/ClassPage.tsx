@@ -726,6 +726,14 @@ export function ClassPage({ classId }: { classId: string }) {
                   >
                     <History className="h-4 w-4 text-muted-foreground" />
                   </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setNotesFor(s)}
+                    title="ملاحظات"
+                  >
+                    <StickyNote className="h-4 w-4 text-muted-foreground" />
+                  </Button>
                   <Button variant="ghost" size="icon" onClick={() => removeStudent(s.id)}>
                     <Trash2 className="h-4 w-4 text-muted-foreground" />
                   </Button>
