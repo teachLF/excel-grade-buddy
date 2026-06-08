@@ -31,7 +31,13 @@ import {
   UserX,
   UserCheck,
   Sparkles,
+  BarChart3,
+  Printer,
+  StickyNote,
+  Trophy,
 } from "lucide-react";
+import { StudentNotesDialog } from "@/components/StudentNotesDialog";
+import { ClassStatsDialog, pointsFor } from "@/components/ClassStatsDialog";
 
 type Student = {
   id: string;
@@ -133,6 +139,8 @@ export function ClassPage({ classId }: { classId: string }) {
   const [events, setEvents] = useState<StudentEvent[]>([]);
   const [newName, setNewName] = useState("");
   const [historyFor, setHistoryFor] = useState<Student | null>(null);
+  const [notesFor, setNotesFor] = useState<Student | null>(null);
+  const [statsOpen, setStatsOpen] = useState(false);
 
   // Voice attendance
   const [listening, setListening] = useState(false);
@@ -486,6 +494,69 @@ export function ClassPage({ classId }: { classId: string }) {
     XLSX.writeFile(wb, `${className || "class"}.xlsx`);
   };
 
+  // ---------- Print / PDF ----------
+  const printPdf = () => {
+    const rows = students
+      .map((s, i) => {
+        const att = attendanceFor(s.id);
+        const c = countsFor(s.id);
+        const pts = pointsFor(s.id, events);
+        return `
+          <tr>
+            <td>${i + 1}</td>
+            <td style="text-align:right">${s.name}</td>
+            <td>${att ? ATTENDANCE[att].label : "-"}</td>
+            <td>${c.star ?? 0}</td>
+            <td>${c.escaped ?? 0}</td>
+            <td>${c.sleeping ?? 0}</td>
+            <td>${c.talking ?? 0}</td>
+            <td><b>${pts > 0 ? "+" + pts : pts}</b></td>
+          </tr>`;
+      })
+      .join("");
+    const html = `<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"/>
+      <title>${className}</title>
+      <style>
+        body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;padding:24px;color:#0f172a}
+        h1{font-size:22px;margin:0 0 4px;color:#4f46e5}
+        .sub{color:#64748b;font-size:12px;margin-bottom:16px}
+        table{border-collapse:collapse;width:100%;font-size:13px}
+        th,td{border:1px solid #e2e8f0;padding:6px 8px;text-align:center}
+        th{background:#f1f5f9}
+        tr:nth-child(even) td{background:#f8fafc}
+        .pill{display:inline-block;padding:2px 10px;border-radius:999px;margin-left:6px;font-size:11px}
+        .g{background:#d1fae5;color:#065f46}.r{background:#fee2e2;color:#991b1b}.y{background:#fef3c7;color:#92400e}
+        @media print{.no-print{display:none}}
+      </style></head><body>
+      <h1>${className}</h1>
+      <div class="sub">
+        إجمالي الطلاب: <b>${students.length}</b>
+        <span class="pill g">حاضر: ${presentCount}</span>
+        <span class="pill r">غائب: ${absentCount}</span>
+        <span class="pill y">نجوم: ${totalStars}</span>
+        — ${new Date().toLocaleString("ar")}
+      </div>
+      <table>
+        <thead><tr>
+          <th>#</th><th>الطالب</th><th>الحضور</th>
+          <th>نجمة</th><th>مشاغب</th><th>نائم</th><th>يتحدث</th><th>النقاط</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="no-print" style="margin-top:16px;text-align:center">
+        <button onclick="window.print()" style="padding:10px 24px;font-size:14px;background:#4f46e5;color:#fff;border:0;border-radius:8px;cursor:pointer">طباعة / حفظ PDF</button>
+      </div>
+      <script>setTimeout(()=>window.print(),300)</script>
+      </body></html>`;
+    const w = window.open("", "_blank");
+    if (!w) {
+      toast.error("تعذّر فتح نافذة الطباعة. اسمح بالنوافذ المنبثقة.");
+      return;
+    }
+    w.document.write(html);
+    w.document.close();
+  };
+
   if (loading || !user) {
     return <div className="min-h-screen flex items-center justify-center">...</div>;
   }
@@ -493,6 +564,14 @@ export function ClassPage({ classId }: { classId: string }) {
   const presentCount = students.filter((s) => attendanceFor(s.id) === "present").length;
   const absentCount = students.filter((s) => attendanceFor(s.id) === "absent").length;
   const totalStars = events.filter((e) => e.event_type === "star").length;
+
+  // Top student (by points) for the crown badge
+  const topStudentId =
+    students.length > 0
+      ? [...students]
+          .map((s) => ({ id: s.id, p: pointsFor(s.id, events) }))
+          .sort((a, b) => b.p - a.p)[0]
+      : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-background to-background">
@@ -506,9 +585,29 @@ export function ClassPage({ classId }: { classId: string }) {
               {className}
             </h1>
           </div>
-          <Button onClick={exportXlsx} size="sm" disabled={students.length === 0}>
-            <Download className="h-4 w-4 ml-1" /> تصدير Excel
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Button
+              onClick={() => setStatsOpen(true)}
+              size="sm"
+              variant="outline"
+              disabled={students.length === 0}
+              title="الإحصائيات"
+            >
+              <BarChart3 className="h-4 w-4 ml-1" /> إحصائيات
+            </Button>
+            <Button
+              onClick={printPdf}
+              size="sm"
+              variant="outline"
+              disabled={students.length === 0}
+              title="طباعة / PDF"
+            >
+              <Printer className="h-4 w-4 ml-1" /> PDF
+            </Button>
+            <Button onClick={exportXlsx} size="sm" disabled={students.length === 0}>
+              <Download className="h-4 w-4 ml-1" /> Excel
+            </Button>
+          </div>
         </div>
         <div className="max-w-5xl mx-auto px-4 pb-3 flex flex-wrap gap-2 text-xs">
           <span className="px-2 py-1 rounded-full bg-muted">
@@ -614,7 +713,27 @@ export function ClassPage({ classId }: { classId: string }) {
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-muted-foreground w-6 text-center">{i + 1}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{s.name}</div>
+                    <div className="font-medium truncate flex items-center gap-1.5">
+                      {topStudentId?.id === s.id && topStudentId.p > 0 && (
+                        <Trophy className="h-4 w-4 text-amber-500 shrink-0" />
+                      )}
+                      <span className="truncate">{s.name}</span>
+                      {(() => {
+                        const pts = pointsFor(s.id, events);
+                        if (pts === 0) return null;
+                        return (
+                          <span
+                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
+                              pts > 0
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-rose-100 text-rose-700"
+                            }`}
+                          >
+                            {pts > 0 ? `+${pts}` : pts}
+                          </span>
+                        );
+                      })()}
+                    </div>
                     {att && (
                       <div
                         className={`text-xs flex items-center gap-1 mt-0.5 ${ATTENDANCE[att].color}`}
@@ -634,6 +753,14 @@ export function ClassPage({ classId }: { classId: string }) {
                     title="السوابق"
                   >
                     <History className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setNotesFor(s)}
+                    title="ملاحظات"
+                  >
+                    <StickyNote className="h-4 w-4 text-muted-foreground" />
                   </Button>
                   <Button variant="ghost" size="icon" onClick={() => removeStudent(s.id)}>
                     <Trash2 className="h-4 w-4 text-muted-foreground" />
@@ -733,6 +860,21 @@ export function ClassPage({ classId }: { classId: string }) {
           </div>
         </DialogContent>
       </Dialog>
+
+      <StudentNotesDialog
+        open={!!notesFor}
+        onOpenChange={(o) => !o && setNotesFor(null)}
+        studentId={notesFor?.id ?? null}
+        studentName={notesFor?.name ?? ""}
+      />
+
+      <ClassStatsDialog
+        open={statsOpen}
+        onOpenChange={setStatsOpen}
+        students={students}
+        events={events}
+        className={className}
+      />
     </div>
   );
 }
