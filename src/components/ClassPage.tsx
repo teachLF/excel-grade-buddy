@@ -494,6 +494,69 @@ export function ClassPage({ classId }: { classId: string }) {
     XLSX.writeFile(wb, `${className || "class"}.xlsx`);
   };
 
+  // ---------- Print / PDF ----------
+  const printPdf = () => {
+    const rows = students
+      .map((s, i) => {
+        const att = attendanceFor(s.id);
+        const c = countsFor(s.id);
+        const pts = pointsFor(s.id, events);
+        return `
+          <tr>
+            <td>${i + 1}</td>
+            <td style="text-align:right">${s.name}</td>
+            <td>${att ? ATTENDANCE[att].label : "-"}</td>
+            <td>${c.star ?? 0}</td>
+            <td>${c.escaped ?? 0}</td>
+            <td>${c.sleeping ?? 0}</td>
+            <td>${c.talking ?? 0}</td>
+            <td><b>${pts > 0 ? "+" + pts : pts}</b></td>
+          </tr>`;
+      })
+      .join("");
+    const html = `<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"/>
+      <title>${className}</title>
+      <style>
+        body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;padding:24px;color:#0f172a}
+        h1{font-size:22px;margin:0 0 4px;color:#4f46e5}
+        .sub{color:#64748b;font-size:12px;margin-bottom:16px}
+        table{border-collapse:collapse;width:100%;font-size:13px}
+        th,td{border:1px solid #e2e8f0;padding:6px 8px;text-align:center}
+        th{background:#f1f5f9}
+        tr:nth-child(even) td{background:#f8fafc}
+        .pill{display:inline-block;padding:2px 10px;border-radius:999px;margin-left:6px;font-size:11px}
+        .g{background:#d1fae5;color:#065f46}.r{background:#fee2e2;color:#991b1b}.y{background:#fef3c7;color:#92400e}
+        @media print{.no-print{display:none}}
+      </style></head><body>
+      <h1>${className}</h1>
+      <div class="sub">
+        إجمالي الطلاب: <b>${students.length}</b>
+        <span class="pill g">حاضر: ${presentCount}</span>
+        <span class="pill r">غائب: ${absentCount}</span>
+        <span class="pill y">نجوم: ${totalStars}</span>
+        — ${new Date().toLocaleString("ar")}
+      </div>
+      <table>
+        <thead><tr>
+          <th>#</th><th>الطالب</th><th>الحضور</th>
+          <th>نجمة</th><th>مشاغب</th><th>نائم</th><th>يتحدث</th><th>النقاط</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="no-print" style="margin-top:16px;text-align:center">
+        <button onclick="window.print()" style="padding:10px 24px;font-size:14px;background:#4f46e5;color:#fff;border:0;border-radius:8px;cursor:pointer">طباعة / حفظ PDF</button>
+      </div>
+      <script>setTimeout(()=>window.print(),300)</script>
+      </body></html>`;
+    const w = window.open("", "_blank");
+    if (!w) {
+      toast.error("تعذّر فتح نافذة الطباعة. اسمح بالنوافذ المنبثقة.");
+      return;
+    }
+    w.document.write(html);
+    w.document.close();
+  };
+
   if (loading || !user) {
     return <div className="min-h-screen flex items-center justify-center">...</div>;
   }
