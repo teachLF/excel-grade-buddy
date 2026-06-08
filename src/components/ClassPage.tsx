@@ -832,6 +832,21 @@ export function ClassPage({ classId }: { classId: string }) {
           </div>
         </DialogContent>
       </Dialog>
+
+      <StudentNotesDialog
+        open={!!notesFor}
+        onOpenChange={(o) => !o && setNotesFor(null)}
+        studentId={notesFor?.id ?? null}
+        studentName={notesFor?.name ?? ""}
+      />
+
+      <ClassStatsDialog
+        open={statsOpen}
+        onOpenChange={setStatsOpen}
+        students={students}
+        events={events}
+        className={className}
+      />
     </div>
   );
 }
