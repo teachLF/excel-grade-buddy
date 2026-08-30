@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, Plus, Upload, Trash2, Users, Shield, Code2 } from "lucide-react";
+import { LogOut, Plus, Upload, Trash2, Users, Shield, Code2, GraduationCap } from "lucide-react";
 
 type ClassRow = { id: string; name: string; created_at: string };
 
@@ -159,28 +159,33 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <header className="border-b bg-background">
+      <header className="bg-brand-gradient text-primary-foreground">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold">متابعة الطلاب</h1>
-            <p className="text-xs text-muted-foreground">{user.email}</p>
+          <div className="flex items-center gap-3">
+            <div className="grid place-items-center h-10 w-10 rounded-xl bg-white/10 backdrop-blur ring-1 ring-white/15">
+              <GraduationCap className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold leading-tight">متابعة الطلاب</h1>
+              <p className="text-xs text-primary-foreground/70" dir="ltr">{user.email}</p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {isAdmin && (
               <>
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="secondary" size="sm" asChild className="bg-white/10 text-primary-foreground hover:bg-white/20 border-white/10">
                   <Link to="/admin">
                     <Shield className="h-4 w-4 ml-1" /> لوحة المسؤول
                   </Link>
                 </Button>
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="secondary" size="sm" asChild className="bg-white/10 text-primary-foreground hover:bg-white/20 border-white/10">
                   <Link to="/source">
                     <Code2 className="h-4 w-4 ml-1" /> أكواد الموقع
                   </Link>
                 </Button>
               </>
             )}
-            <Button variant="ghost" size="sm" onClick={logout}>
+            <Button variant="secondary" size="sm" onClick={logout} className="bg-white/10 text-primary-foreground hover:bg-white/20 border-white/10">
               <LogOut className="h-4 w-4 ml-1" /> خروج
             </Button>
           </div>
@@ -188,7 +193,27 @@ export function Dashboard() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-        <Card className="p-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <Card className="p-4 flex items-center gap-3">
+            <div className="grid place-items-center h-10 w-10 rounded-xl bg-accent text-accent-foreground">
+              <Users className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold leading-none">{classes.length}</p>
+              <p className="text-xs text-muted-foreground mt-1">الفصول</p>
+            </div>
+          </Card>
+          <Card className="p-4">
+            <p className="text-xs text-muted-foreground">تذكير</p>
+            <p className="text-sm font-medium mt-1 leading-snug">استورد أسماء الطلاب من ملف Excel أو أنشئ فصلًا يدويًا.</p>
+          </Card>
+          <Card className="p-4 col-span-2 sm:col-span-1">
+            <p className="text-xs text-muted-foreground">الحالة</p>
+            <p className="text-sm font-medium mt-1 text-foreground">{isAdmin ? "حساب مسؤول" : "حساب معتمد"}</p>
+          </Card>
+        </div>
+
+        <Card className="p-5 shadow-elegant">
           <h2 className="font-semibold mb-3">إنشاء فصل جديد</h2>
           <div className="flex flex-col sm:flex-row gap-2">
             <Input
@@ -197,7 +222,7 @@ export function Dashboard() {
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && createClass()}
             />
-            <Button onClick={createClass} disabled={!newName.trim()}>
+            <Button onClick={createClass} disabled={!newName.trim()} className="bg-accent-gradient hover:opacity-90">
               <Plus className="h-4 w-4 ml-1" /> إضافة
             </Button>
             <Button
@@ -230,19 +255,23 @@ export function Dashboard() {
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {classes.map((c) => (
-                <Card key={c.id} className="p-4 flex items-center justify-between hover:shadow-md transition-shadow">
+                <Card key={c.id} className="group p-4 flex items-center justify-between hover:shadow-elegant hover:-translate-y-0.5 transition-all overflow-hidden relative">
+                  <div className="absolute inset-y-0 right-0 w-1 bg-accent-gradient opacity-70" />
                   <Link
                     to="/class/$id"
                     params={{ id: c.id }}
-                    className="flex-1 flex items-center gap-2 font-medium"
+                    className="flex-1 flex items-center gap-3 font-medium"
                   >
-                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="grid place-items-center h-9 w-9 rounded-lg bg-accent/60 text-accent-foreground">
+                      <Users className="h-4 w-4" />
+                    </span>
                     {c.name}
                   </Link>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => deleteClass(c.id)}
+                    className="opacity-60 group-hover:opacity-100"
                   >
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
