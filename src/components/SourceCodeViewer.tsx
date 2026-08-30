@@ -21,7 +21,12 @@ const downloadBlob = (content: string, filename: string, type: string) => {
 };
 
 const modules = import.meta.glob(
-  ["/src/**/*.{ts,tsx,css}", "!/src/routeTree.gen.ts"],
+  [
+    "/src/**/*.{ts,tsx,js,jsx,css,html,txt,md,json}",
+    "/public/**/*.{txt,xml,json,html,css,js}",
+    "/*.{ts,js,json,html,md,txt}",
+    "!/src/routeTree.gen.ts",
+  ],
   {
     query: "?raw",
     import: "default",
