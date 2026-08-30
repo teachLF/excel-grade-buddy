@@ -100,9 +100,15 @@ export function SourceCodeViewer() {
             <p className="text-xs text-muted-foreground">{files.length} ملف</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={exportAll}>
-              <Download className="h-4 w-4 ml-1" /> تحميل كل الأكواد (HTML واحد)
+            <Button size="sm" asChild>
+              <a href="/teachlf-single.html" download="teachlf-single.html">
+                <Download className="h-4 w-4 ml-1" /> تحميل الموقع كملف HTML واحد يعمل
+              </a>
             </Button>
+            <Button variant="outline" size="sm" onClick={exportAll}>
+              <Download className="h-4 w-4 ml-1" /> تحميل الأكواد المصدرية
+            </Button>
+
             <Button variant="ghost" size="sm" asChild>
               <Link to="/">
                 <ArrowRight className="h-4 w-4 ml-1" /> رجوع
