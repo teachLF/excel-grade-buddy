@@ -83,14 +83,27 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-md p-8">
-        <h1 className="text-2xl font-bold mb-2 text-center">متابعة الطلاب</h1>
-        <p className="text-sm text-muted-foreground mb-6 text-center">
-          {mode === "signin" ? "سجّل دخولك للمتابعة" : "أنشئ حساباً جديداً"}
-        </p>
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-brand-gradient">
+      <div className="pointer-events-none absolute inset-0 opacity-40">
+        <div className="absolute -top-24 -right-24 h-80 w-80 rounded-full bg-accent-strong/30 blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-primary/40 blur-3xl" />
+      </div>
+
+      <Card className="relative w-full max-w-md p-8 backdrop-blur-xl bg-card/90 border-white/10 shadow-glow">
+        <div className="flex flex-col items-center text-center mb-6">
+          <div className="mb-3 grid place-items-center h-14 w-14 rounded-2xl bg-accent-gradient text-primary-foreground shadow-elegant">
+            <GraduationCap className="h-7 w-7" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            متابعة <span className="text-gradient">الطلاب</span>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {mode === "signin" ? "سجّل دخولك للمتابعة" : "أنشئ حساباً جديداً"}
+          </p>
+        </div>
+
         <form onSubmit={submit} className="space-y-4">
-          <div>
+          <div className="space-y-1.5">
             <Label htmlFor="email">البريد الإلكتروني</Label>
             <Input
               id="email"
@@ -99,9 +112,10 @@ export function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className="bg-background/60"
             />
           </div>
-          <div>
+          <div className="space-y-1.5">
             <Label htmlFor="password">كلمة المرور</Label>
             <Input
               id="password"
@@ -111,14 +125,15 @@ export function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
+              className="bg-background/60"
             />
           </div>
-          <Button type="submit" className="w-full" disabled={busy}>
+          <Button type="submit" className="w-full bg-accent-gradient hover:opacity-90 shadow-elegant" disabled={busy}>
             {busy ? "..." : mode === "signin" ? "دخول" : "إنشاء حساب"}
           </Button>
         </form>
 
-        <div className="relative my-4">
+        <div className="relative my-5">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
           </div>
@@ -131,7 +146,7 @@ export function LoginPage() {
           <Button
             type="button"
             variant="outline"
-            className="w-full"
+            className="w-full bg-background/60"
             disabled={busy}
             onClick={signInWithGoogle}
           >
@@ -142,7 +157,7 @@ export function LoginPage() {
           <Button
             type="button"
             variant="outline"
-            className="w-full"
+            className="w-full bg-background/60"
             disabled={busy}
             onClick={signInWithApple}
           >
@@ -161,7 +176,7 @@ export function LoginPage() {
         <button
           type="button"
           onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-          className="w-full mt-4 text-sm text-muted-foreground hover:text-foreground"
+          className="w-full mt-5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           {mode === "signin" ? "ليس لديك حساب؟ سجّل الآن" : "لديك حساب؟ سجّل دخولك"}
         </button>
