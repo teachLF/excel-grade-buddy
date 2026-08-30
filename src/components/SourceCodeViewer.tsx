@@ -100,11 +100,8 @@ export function SourceCodeViewer() {
             <p className="text-xs text-muted-foreground">{files.length} ملف</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={exportTxt}>
-              <FileText className="h-4 w-4 ml-1" /> تصدير نصي
-            </Button>
-            <Button variant="outline" size="sm" onClick={exportHtml}>
-              <Download className="h-4 w-4 ml-1" /> تصدير HTML
+            <Button variant="outline" size="sm" onClick={exportAll}>
+              <Download className="h-4 w-4 ml-1" /> تحميل كل الأكواد (HTML واحد)
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/">
