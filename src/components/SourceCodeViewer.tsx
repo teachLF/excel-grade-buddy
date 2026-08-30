@@ -8,11 +8,15 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ArrowRight, Copy, FileCode, Search } from "lucide-react";
 
-const modules = import.meta.glob("/src/**/*.{ts,tsx,css}", {
-  query: "?raw",
-  import: "default",
-  eager: true,
-}) as Record<string, string>;
+const modules = import.meta.glob(
+  ["/src/**/*.{ts,tsx,css}", "!/src/routeTree.gen.ts"],
+  {
+    query: "?raw",
+    import: "default",
+    eager: true,
+  },
+) as Record<string, string>;
+
 
 
 export function SourceCodeViewer() {
