@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowRight, Copy, FileCode, Search, Download, FileText } from "lucide-react";
+import { ArrowRight, Copy, FileCode, Search, Download } from "lucide-react";
 
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
