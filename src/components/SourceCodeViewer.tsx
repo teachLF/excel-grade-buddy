@@ -14,6 +14,7 @@ const modules = import.meta.glob("/src/**/*.{ts,tsx,css}", {
   eager: true,
 }) as Record<string, string>;
 
+
 export function SourceCodeViewer() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
