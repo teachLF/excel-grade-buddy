@@ -70,11 +70,19 @@ export function SourceCodeViewer() {
             <h1 className="text-xl font-bold">أكواد الموقع</h1>
             <p className="text-xs text-muted-foreground">{files.length} ملف</p>
           </div>
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/">
-              <ArrowRight className="h-4 w-4 ml-1" /> رجوع
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={exportTxt}>
+              <FileText className="h-4 w-4 ml-1" /> تصدير نصي
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportHtml}>
+              <Download className="h-4 w-4 ml-1" /> تصدير HTML
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/">
+                <ArrowRight className="h-4 w-4 ml-1" /> رجوع
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
