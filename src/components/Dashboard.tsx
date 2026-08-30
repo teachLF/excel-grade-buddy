@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, Plus, Upload, Trash2, Users, Shield } from "lucide-react";
+import { LogOut, Plus, Upload, Trash2, Users, Shield, Code2 } from "lucide-react";
 
 type ClassRow = { id: string; name: string; created_at: string };
 
@@ -167,11 +167,18 @@ export function Dashboard() {
           </div>
           <div className="flex items-center gap-2">
             {isAdmin && (
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/admin">
-                  <Shield className="h-4 w-4 ml-1" /> لوحة المسؤول
-                </Link>
-              </Button>
+              <>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/admin">
+                    <Shield className="h-4 w-4 ml-1" /> لوحة المسؤول
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/source">
+                    <Code2 className="h-4 w-4 ml-1" /> أكواد الموقع
+                  </Link>
+                </Button>
+              </>
             )}
             <Button variant="ghost" size="sm" onClick={logout}>
               <LogOut className="h-4 w-4 ml-1" /> خروج
