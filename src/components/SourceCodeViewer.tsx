@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowRight, Copy, FileCode, Search, Download, FileText } from "lucide-react";
+import { ArrowRight, Copy, FileCode, Search, Download } from "lucide-react";
 
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -21,7 +21,12 @@ const downloadBlob = (content: string, filename: string, type: string) => {
 };
 
 const modules = import.meta.glob(
-  ["/src/**/*.{ts,tsx,css}", "!/src/routeTree.gen.ts"],
+  [
+    "/src/**/*.{ts,tsx,js,jsx,css,html,txt,md,json}",
+    "/public/**/*.{txt,xml,json,html,css,js}",
+    "/*.{ts,js,json,html,md,txt}",
+    "!/src/routeTree.gen.ts",
+  ],
   {
     query: "?raw",
     import: "default",
@@ -58,28 +63,28 @@ export function SourceCodeViewer() {
 
   const current = active && modules[active] ? active : filtered[0] ?? null;
 
-  const exportTxt = () => {
-    const content = filtered
-      .map((f) => `${"=".repeat(70)}\n${f}\n${"=".repeat(70)}\n\n${modules[f]}`)
-      .join("\n\n");
-    downloadBlob(content, "teachlf-source.txt", "text/plain;charset=utf-8");
-    toast.success(`تم تصدير ${filtered.length} ملف`);
-  };
-
-  const exportHtml = () => {
-    const toc = filtered
-      .map((f) => `<li><a href="#${encodeURIComponent(f)}">${escapeHtml(f)}</a></li>`)
+  const exportAll = () => {
+    const all = files;
+    const toc = all
+      .map(
+        (f) =>
+          `<li><a href="#${encodeURIComponent(f)}">${escapeHtml(f)}</a></li>`,
+      )
       .join("");
-    const body = filtered
+    const body = all
       .map(
         (f) =>
           `<section id="${encodeURIComponent(f)}"><h2>${escapeHtml(f)}</h2><pre><code>${escapeHtml(modules[f])}</code></pre></section>`,
       )
       .join("");
-    const html = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>أكواد teachLF</title><style>body{font-family:system-ui;margin:0;padding:24px;background:#0f172a;color:#e2e8f0}h1{font-size:20px}h2{font-size:14px;direction:ltr;text-align:left;color:#7dd3fc;margin-top:32px}pre{direction:ltr;text-align:left;background:#111827;padding:16px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.6}a{color:#7dd3fc}</style></head><body><h1>أكواد الموقع (${filtered.length} ملف)</h1><ul style="direction:ltr;text-align:left">${toc}</ul>${body}</body></html>`;
+    const plain = all
+      .map((f) => `${"=".repeat(70)}\n${f}\n${"=".repeat(70)}\n\n${modules[f]}`)
+      .join("\n\n");
+    const html = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>أكواد teachLF</title><style>body{font-family:system-ui;margin:0;padding:24px;background:#0f172a;color:#e2e8f0}h1{font-size:20px}h2{font-size:14px;direction:ltr;text-align:left;color:#7dd3fc;margin-top:32px}pre{direction:ltr;text-align:left;background:#111827;padding:16px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.6}a{color:#7dd3fc}button{margin:8px 0;padding:8px 14px;border-radius:8px;border:0;background:#0ea5e9;color:#fff;cursor:pointer;font-size:13px}</style></head><body><h1>أكواد الموقع (${all.length} ملف)</h1><button onclick="(function(){var b=new Blob([document.getElementById('raw').textContent],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='teachlf-source.txt';a.click();})()">تحميل نسخة نصية TXT</button><ul style="direction:ltr;text-align:left">${toc}</ul>${body}<script type="text/plain" id="raw">${plain.replace(/<\/script/gi, "<\\/script")}<\/script></body></html>`;
     downloadBlob(html, "teachlf-source.html", "text/html;charset=utf-8");
-    toast.success(`تم تصدير ${filtered.length} ملف`);
+    toast.success(`تم تصدير ${all.length} ملف في ملف واحد`);
   };
+
 
 
   if (authLoading || roleLoading || !isAdmin) {
@@ -95,11 +100,8 @@ export function SourceCodeViewer() {
             <p className="text-xs text-muted-foreground">{files.length} ملف</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={exportTxt}>
-              <FileText className="h-4 w-4 ml-1" /> تصدير نصي
-            </Button>
-            <Button variant="outline" size="sm" onClick={exportHtml}>
-              <Download className="h-4 w-4 ml-1" /> تصدير HTML
+            <Button variant="outline" size="sm" onClick={exportAll}>
+              <Download className="h-4 w-4 ml-1" /> تحميل كل الأكواد (HTML واحد)
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/">
