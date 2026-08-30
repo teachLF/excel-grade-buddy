@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
-import { Chrome } from "lucide-react";
+import { Chrome, GraduationCap } from "lucide-react";
 
 export function LoginPage() {
   const navigate = useNavigate();
