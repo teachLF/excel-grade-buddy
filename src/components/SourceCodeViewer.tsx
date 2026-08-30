@@ -58,6 +58,30 @@ export function SourceCodeViewer() {
 
   const current = active && modules[active] ? active : filtered[0] ?? null;
 
+  const exportTxt = () => {
+    const content = filtered
+      .map((f) => `${"=".repeat(70)}\n${f}\n${"=".repeat(70)}\n\n${modules[f]}`)
+      .join("\n\n");
+    downloadBlob(content, "teachlf-source.txt", "text/plain;charset=utf-8");
+    toast.success(`تم تصدير ${filtered.length} ملف`);
+  };
+
+  const exportHtml = () => {
+    const toc = filtered
+      .map((f) => `<li><a href="#${encodeURIComponent(f)}">${escapeHtml(f)}</a></li>`)
+      .join("");
+    const body = filtered
+      .map(
+        (f) =>
+          `<section id="${encodeURIComponent(f)}"><h2>${escapeHtml(f)}</h2><pre><code>${escapeHtml(modules[f])}</code></pre></section>`,
+      )
+      .join("");
+    const html = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>أكواد teachLF</title><style>body{font-family:system-ui;margin:0;padding:24px;background:#0f172a;color:#e2e8f0}h1{font-size:20px}h2{font-size:14px;direction:ltr;text-align:left;color:#7dd3fc;margin-top:32px}pre{direction:ltr;text-align:left;background:#111827;padding:16px;border-radius:8px;overflow:auto;font-size:12px;line-height:1.6}a{color:#7dd3fc}</style></head><body><h1>أكواد الموقع (${filtered.length} ملف)</h1><ul style="direction:ltr;text-align:left">${toc}</ul>${body}</body></html>`;
+    downloadBlob(html, "teachlf-source.html", "text/html;charset=utf-8");
+    toast.success(`تم تصدير ${filtered.length} ملف`);
+  };
+
+
   if (authLoading || roleLoading || !isAdmin) {
     return <div className="min-h-screen flex items-center justify-center">...</div>;
   }
