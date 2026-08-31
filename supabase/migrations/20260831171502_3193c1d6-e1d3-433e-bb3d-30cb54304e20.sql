@@ -1,0 +1,1 @@
+drop function if exists public.sync_profiles_for_admin();

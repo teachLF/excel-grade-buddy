@@ -202,7 +202,6 @@ export type Database = {
         Returns: boolean
       }
       is_approved: { Args: { _user_id: string }; Returns: boolean }
-      sync_profiles_for_admin: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "admin" | "user"
