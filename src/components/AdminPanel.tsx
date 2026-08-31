@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -17,9 +17,9 @@ type Profile = {
 };
 
 export function AdminPanel() {
-  const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: roleLoading } = useIsAdmin();
+  const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
+
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -27,17 +27,8 @@ export function AdminPanel() {
   const [toDate, setToDate] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved">("pending");
 
-  useEffect(() => {
-    if (!authLoading && !user) navigate({ to: "/login" });
-  }, [authLoading, user, navigate]);
+  // access control handled by <AdminGuard>
 
-  useEffect(() => {
-    if (roleLoading || !user) return;
-    if (!isAdmin) {
-      toast.error("هذه الصفحة للمسؤولين فقط");
-      navigate({ to: "/" });
-    }
-  }, [isAdmin, roleLoading, user, navigate]);
 
   const load = async () => {
     setLoading(true);
@@ -79,9 +70,10 @@ export function AdminPanel() {
     });
   }, [profiles, query, fromDate, toDate, statusFilter]);
 
-  if (authLoading || roleLoading || !isAdmin) {
+  if (!isAdmin) {
     return <div className="min-h-screen flex items-center justify-center">...</div>;
   }
+
 
   return (
     <div className="min-h-screen bg-muted/30">
