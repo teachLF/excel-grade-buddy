@@ -15,8 +15,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
-      - run: npm run build
+      - name: Build project
+        run: |
+          if [ -d "tamii" ]; then
+            cd tamii
+            npm install
+            npm run build
+            cd ..
+            mkdir -p dist
+            cp -r tamii/dist/* dist/ 2>/dev/null || cp -r tamii/dist dist 2>/dev/null || true
+          fi
+          if [ ! -d "dist" ]; then
+            npm install
+            npm run build
+          fi
+          ls -la
+          ls -la dist || ls -la tamii/dist
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
