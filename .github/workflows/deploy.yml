@@ -17,12 +17,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npm run build
-      - run: ls -la
-      - run: ls -la dist || true
-      - run: ls -la dist/client || true
+      - run: ls -la dist/client
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
