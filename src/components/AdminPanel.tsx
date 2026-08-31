@@ -27,17 +27,8 @@ export function AdminPanel() {
   const [toDate, setToDate] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved">("pending");
 
-  useEffect(() => {
-    if (!authLoading && !user) navigate({ to: "/login" });
-  }, [authLoading, user, navigate]);
+  // access control handled by <AdminGuard>
 
-  useEffect(() => {
-    if (roleLoading || !user) return;
-    if (!isAdmin) {
-      toast.error("هذه الصفحة للمسؤولين فقط");
-      navigate({ to: "/" });
-    }
-  }, [isAdmin, roleLoading, user, navigate]);
 
   const load = async () => {
     setLoading(true);
