@@ -57,7 +57,11 @@ export function LoginPage() {
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        if (data.user) await reportAccess(data.user.id, data.user.email ?? email);
+        if (data.user) {
+          const { error: profileError } = await supabase.rpc("ensure_my_profile");
+          if (profileError) throw profileError;
+          await reportAccess(data.user.id, data.user.email ?? email);
+        }
       }
       navigate({ to: "/" });
     } catch (err: unknown) {

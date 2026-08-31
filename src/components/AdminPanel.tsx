@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowRight, Check, X, Search } from "lucide-react";
+import { ArrowRight, Check, X, Search, RefreshCw } from "lucide-react";
 
 type Profile = {
   id: string;
@@ -42,7 +42,10 @@ export function AdminPanel() {
   };
 
   useEffect(() => {
-    if (isAdmin) load();
+    if (!isAdmin) return;
+    void load();
+    const timer = window.setInterval(() => void load(), 15000);
+    return () => window.clearInterval(timer);
   }, [isAdmin]);
 
   const setApproved = async (id: string, approved: boolean) => {
@@ -145,9 +148,15 @@ export function AdminPanel() {
           )}
         </Card>
 
-        <p className="text-sm text-muted-foreground">
-          {loading ? "جاري التحميل..." : `${filtered.length} من ${profiles.length} مستخدم`}
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            {loading ? "جاري التحميل..." : `${filtered.length} من ${profiles.length} مستخدم`}
+          </p>
+          <Button type="button" variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
+            <RefreshCw className={`ml-1 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            تحديث الطلبات
+          </Button>
+        </div>
 
         {filtered.length === 0 && !loading ? (
           <Card className="p-8 text-center text-muted-foreground">
