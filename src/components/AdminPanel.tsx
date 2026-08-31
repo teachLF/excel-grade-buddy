@@ -70,9 +70,10 @@ export function AdminPanel() {
     });
   }, [profiles, query, fromDate, toDate, statusFilter]);
 
-  if (authLoading || roleLoading || !isAdmin) {
+  if (!isAdmin) {
     return <div className="min-h-screen flex items-center justify-center">...</div>;
   }
+
 
   return (
     <div className="min-h-screen bg-muted/30">
