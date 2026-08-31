@@ -23,6 +23,25 @@ export function LoginPage() {
     if (!loading && session) navigate({ to: "/" });
   }, [loading, session, navigate]);
 
+  const reportAccess = async (userId: string, userEmail: string) => {
+    const [{ data: profile }, { data: role }] = await Promise.all([
+      supabase.from("profiles").select("approved").eq("id", userId).maybeSingle(),
+      supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle(),
+    ]);
+    if (role) {
+      toast.success(`مرحباً ${userEmail} — لديك صلاحية المسؤول، يمكنك فتح /admin`);
+    } else if (profile?.approved === false) {
+      toast.warning("حسابك قيد المراجعة ولم يُعتمد بعد، ولا يملك صلاحية المسؤول");
+    } else {
+      toast.info("تم الدخول كحساب معلم عادي — لوحة المسؤول تتطلب صلاحية admin");
+    }
+  };
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setBusy(true);
@@ -36,8 +55,9 @@ export function LoginPage() {
         if (error) throw error;
         toast.success("تم إنشاء الحساب بنجاح");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        if (data.user) await reportAccess(data.user.id, data.user.email ?? email);
       }
       navigate({ to: "/" });
     } catch (err: unknown) {
@@ -47,6 +67,7 @@ export function LoginPage() {
       setBusy(false);
     }
   };
+
 
   const signInWithGoogle = async () => {
     setBusy(true);
