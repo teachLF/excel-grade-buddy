@@ -17,9 +17,9 @@ type Profile = {
 };
 
 export function AdminPanel() {
-  const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: roleLoading } = useIsAdmin();
+  const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
+
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
