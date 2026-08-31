@@ -7,22 +7,29 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const ensure = (s: Session | null) => {
-      if (!s) return;
-      // ينشئ سجل المستخدم ودوره الافتراضي عند أول دخول
-      void supabase.rpc("ensure_my_profile");
+    let active = true;
+
+    const applySession = async (nextSession: Session | null) => {
+      if (nextSession) {
+        // أكمل إنشاء الملف والدور قبل أن تبدأ الشاشات بطلب بيانات المستخدم.
+        const { error } = await supabase.rpc("ensure_my_profile");
+        if (error) console.error("Profile bootstrap failed", error);
+      }
+      if (!active) return;
+      setSession(nextSession);
+      setLoading(false);
     };
+
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
-      setSession(s);
-      setLoading(false);
-      ensure(s);
+      // تنفيذ الطلب خارج callback يمنع تعارض قفل جلسة المصادقة.
+      window.setTimeout(() => void applySession(s), 0);
     });
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-      ensure(data.session);
-    });
-    return () => sub.subscription.unsubscribe();
+    void supabase.auth.getSession().then(({ data }) => applySession(data.session));
+
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   return { session, user: session?.user ?? null, loading };
