@@ -179,6 +179,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ensure_my_profile: {
+        Args: never
+        Returns: {
+          approved: boolean
+          created_at: string
+          email: string | null
+          id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
