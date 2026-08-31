@@ -19,6 +19,9 @@ jobs:
           node-version: 20
       - run: npm install
       - run: npm run build
+      - run: |
+          touch.output/public/.nojekyll
+          cp.output/public/index.html.output/public/404.html || echo "no index"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
