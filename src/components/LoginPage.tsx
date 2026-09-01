@@ -20,8 +20,24 @@ export function LoginPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!loading && session) navigate({ to: "/" });
+    if (loading || !session) return;
+    let active = true;
+    (async () => {
+      let isStudent = false;
+      try {
+        const { data } = await supabase.rpc("my_student_stats");
+        isStudent = Array.isArray(data) && data.length > 0;
+      } catch {
+        isStudent = false;
+      }
+      if (!active) return;
+      navigate({ to: isStudent ? "/my-stats" : "/" });
+    })();
+    return () => {
+      active = false;
+    };
   }, [loading, session, navigate]);
+
 
   const reportAccess = async (userId: string, userEmail: string) => {
     const [{ data: profile }, { data: role }] = await Promise.all([
