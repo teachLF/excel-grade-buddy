@@ -26,10 +26,11 @@ type Ev = { student_id: string; event_type: string };
 const POINTS: Record<string, number> = {
   star: 5,
   present: 1,
-  absent: -3,
+  absent: 0,
   escaped: -2,
-  sleeping: -2,
-  talking: -2,
+  misbehaving: -2,
+  sleeping: -1,
+  talking: -1,
 };
 
 export function pointsFor(studentId: string, events: Ev[]) {
@@ -68,6 +69,7 @@ export function ClassStatsDialog({
     escaped: events.filter((e) => e.event_type === "escaped").length,
     sleeping: events.filter((e) => e.event_type === "sleeping").length,
     talking: events.filter((e) => e.event_type === "talking").length,
+    misbehaving: events.filter((e) => e.event_type === "misbehaving").length,
   };
 
   const attendanceData = [
@@ -82,7 +84,8 @@ export function ClassStatsDialog({
 
   const behaviorData = [
     { name: "نجوم", value: totals.star, color: "#eab308" },
-    { name: "مشاغب", value: totals.escaped, color: "#f97316" },
+    { name: "هارب", value: totals.escaped, color: "#f97316" },
+    { name: "شاغب", value: totals.misbehaving, color: "#ec4899" },
     { name: "نائم", value: totals.sleeping, color: "#3b82f6" },
     { name: "يتحدث", value: totals.talking, color: "#a855f7" },
   ];
@@ -191,8 +194,8 @@ export function ClassStatsDialog({
           <p className="text-[11px] text-muted-foreground mt-3 leading-relaxed">
             <Star className="h-3 w-3 inline text-yellow-500" /> +5 ·{" "}
             <Rabbit className="h-3 w-3 inline text-orange-500" /> -2 ·{" "}
-            <Moon className="h-3 w-3 inline text-blue-500" /> -2 ·{" "}
-            <MessageCircle className="h-3 w-3 inline text-purple-500" /> -2 · حاضر +1 · غائب -3
+            <Moon className="h-3 w-3 inline text-blue-500" /> -1 ·{" "}
+            <MessageCircle className="h-3 w-3 inline text-purple-500" /> -1 · شاغب -2 · حاضر +1 · غائب 0
           </p>
         </div>
       </DialogContent>
