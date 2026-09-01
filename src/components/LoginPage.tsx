@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { Chrome, GraduationCap } from "lucide-react";
+import { isAdminEmail } from "@/lib/admin";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -23,6 +24,11 @@ export function LoginPage() {
     if (loading || !session) return;
     let active = true;
     (async () => {
+      // المسؤول يُوجَّه دائمًا إلى لوحة التحكم ولا يُعامَل كطالبة
+      if (isAdminEmail(session.user?.email)) {
+        if (active) navigate({ to: "/" });
+        return;
+      }
       let isStudent = false;
       try {
         const { data } = await supabase.rpc("my_student_stats");
@@ -49,7 +55,7 @@ export function LoginPage() {
         .eq("role", "admin")
         .maybeSingle(),
     ]);
-    if (role) {
+    if (role || isAdminEmail(userEmail)) {
       toast.success(`مرحباً ${userEmail} — لديك صلاحية المسؤول، يمكنك فتح /admin`);
     } else if (profile?.approved === false) {
       toast.warning("حسابك قيد المراجعة ولم يُعتمد بعد، ولا يملك صلاحية المسؤول");
@@ -59,7 +65,21 @@ export function LoginPage() {
   };
 
   // الطالبة تُوجَّه لصفحتها الخاصة، والمعلمة إلى الدفتر
-  const goAfterLogin = async () => {
+  const goAfterLogin = async (email?: string | null) => {
+    let effectiveEmail = email ?? null;
+    if (!effectiveEmail) {
+      try {
+        const { data } = await supabase.auth.getUser();
+        effectiveEmail = data.user?.email ?? null;
+      } catch {
+        /* تجاهل */
+      }
+    }
+    // المسؤول يُوجَّه دائمًا إلى لوحة التحكم
+    if (isAdminEmail(effectiveEmail)) {
+      navigate({ to: "/" });
+      return;
+    }
     try {
       const { data } = await supabase.rpc("my_student_stats");
       const row = Array.isArray(data) ? data[0] : null;
@@ -95,7 +115,7 @@ export function LoginPage() {
           await reportAccess(data.user.id, data.user.email ?? email);
         }
       }
-      await goAfterLogin();
+      await goAfterLogin(email);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "حدث خطأ";
       toast.error(msg);
