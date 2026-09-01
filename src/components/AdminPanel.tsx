@@ -140,7 +140,7 @@ export function AdminPanel() {
                 setQuery("");
                 setFromDate("");
                 setToDate("");
-                setStatusFilter("pending");
+                setStatusFilter("all");
               }}
             >
               مسح التصفية
