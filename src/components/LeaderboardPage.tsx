@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ArrowRight, Trophy, ShieldCheck } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type Row = { rank: number; display_name: string; total_points: number; is_me: boolean | null };
 
@@ -56,6 +57,9 @@ export function LeaderboardPage() {
           <h1 className="text-lg font-bold flex items-center gap-2">
             <Trophy className="h-5 w-5 text-amber-500" /> لوحة الصدارة
           </h1>
+          <div className="ml-auto">
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 

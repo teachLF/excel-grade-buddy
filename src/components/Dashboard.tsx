@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, Plus, Upload, Trash2, Users, Shield, Code2, GraduationCap, Trophy } from "lucide-react";
+import { LogOut, Plus, Upload, Trash2, Users, Shield, Code2, GraduationCap, Trophy, BarChart3 } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type ClassRow = { id: string; name: string; created_at: string };
 
@@ -171,6 +172,12 @@ export function Dashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle onHeader />
+            <Button variant="secondary" size="sm" asChild className="bg-white/10 text-primary-foreground hover:bg-white/20 border-white/10">
+              <Link to="/analytics">
+                <BarChart3 className="h-4 w-4 ml-1" /> التقارير
+              </Link>
+            </Button>
             <Button variant="secondary" size="sm" asChild className="bg-white/10 text-primary-foreground hover:bg-white/20 border-white/10">
               <Link to="/leaderboard">
                 <Trophy className="h-4 w-4 ml-1" /> لوحة الصدارة

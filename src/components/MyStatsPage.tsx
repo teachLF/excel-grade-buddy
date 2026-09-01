@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { LogOut, Trophy, GraduationCap, ShieldCheck } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type Stats = {
   student_name: string | null;
@@ -77,6 +78,7 @@ export function MyStatsPage() {
             <h1 className="text-lg font-bold truncate">إحصائياتي</h1>
           </div>
           <div className="flex items-center gap-1.5">
+            <ThemeToggle />
             <Button asChild size="sm" variant="outline">
               <Link to="/leaderboard">
                 <Trophy className="h-4 w-4 ml-1" /> لوحة الصدارة

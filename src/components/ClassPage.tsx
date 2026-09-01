@@ -37,9 +37,12 @@ import {
   Trophy,
   Laugh,
   Mail,
+  Wand2,
 } from "lucide-react";
 import { StudentNotesDialog } from "@/components/StudentNotesDialog";
 import { ClassStatsDialog, pointsFor } from "@/components/ClassStatsDialog";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { ClassroomToolsDialog } from "@/components/ClassroomToolsDialog";
 
 type Student = {
   id: string;
@@ -145,6 +148,7 @@ export function ClassPage({ classId }: { classId: string }) {
   const [historyFor, setHistoryFor] = useState<Student | null>(null);
   const [notesFor, setNotesFor] = useState<Student | null>(null);
   const [statsOpen, setStatsOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
 
   // Voice attendance
   const [listening, setListening] = useState(false);
@@ -608,6 +612,16 @@ export function ClassPage({ classId }: { classId: string }) {
             </h1>
           </div>
           <div className="flex items-center gap-1.5">
+            <ThemeToggle />
+            <Button
+              onClick={() => setToolsOpen(true)}
+              size="sm"
+              variant="outline"
+              disabled={students.length === 0}
+              title="أدوات الصف التفاعلية"
+            >
+              <Wand2 className="h-4 w-4 ml-1" /> أدوات
+            </Button>
             <Button
               onClick={() => setStatsOpen(true)}
               size="sm"
@@ -873,7 +887,7 @@ export function ClassPage({ classId }: { classId: string }) {
                 if (list.length === 0)
                   return (
                     <div className="text-center text-sm text-muted-foreground py-6">
-                      لا توجد سوابق بعد
+                      لا توجد س��ابق بعد
                     </div>
                   );
                 return list.map((e) => (
@@ -912,6 +926,13 @@ export function ClassPage({ classId }: { classId: string }) {
         onOpenChange={setStatsOpen}
         students={students}
         events={events}
+        className={className}
+      />
+
+      <ClassroomToolsDialog
+        open={toolsOpen}
+        onOpenChange={setToolsOpen}
+        students={students.map((s) => ({ id: s.id, name: s.name }))}
         className={className}
       />
     </div>

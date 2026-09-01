@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ArrowRight, Check, X, Search, RefreshCw } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type Profile = {
   id: string;
@@ -86,11 +87,14 @@ export function AdminPanel() {
             <h1 className="text-xl font-bold">لوحة المسؤول</h1>
             <p className="text-xs text-muted-foreground">إدارة طلبات الانضمام</p>
           </div>
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/">
-              <ArrowRight className="h-4 w-4 ml-1" /> رجوع
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/">
+                <ArrowRight className="h-4 w-4 ml-1" /> رجوع
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 

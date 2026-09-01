@@ -10,6 +10,7 @@ import {
 
 import "../styles.css";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider, themeNoFlashScript } from "@/hooks/useTheme";
 
 function NotFoundComponent() {
   return (
@@ -105,6 +106,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar" dir="rtl">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeNoFlashScript }} />
         <HeadContent />
       </head>
       <body>
@@ -120,8 +122,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
-      <Toaster position="top-center" richColors />
+      <ThemeProvider>
+        <Outlet />
+        <Toaster position="top-center" richColors />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
