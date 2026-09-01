@@ -20,8 +20,24 @@ export function LoginPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!loading && session) navigate({ to: "/" });
+    if (loading || !session) return;
+    let active = true;
+    (async () => {
+      let isStudent = false;
+      try {
+        const { data } = await supabase.rpc("my_student_stats");
+        isStudent = Array.isArray(data) && data.length > 0;
+      } catch {
+        isStudent = false;
+      }
+      if (!active) return;
+      navigate({ to: isStudent ? "/my-stats" : "/" });
+    })();
+    return () => {
+      active = false;
+    };
   }, [loading, session, navigate]);
+
 
   const reportAccess = async (userId: string, userEmail: string) => {
     const [{ data: profile }, { data: role }] = await Promise.all([
@@ -41,6 +57,22 @@ export function LoginPage() {
       toast.info("تم الدخول كحساب معلم عادي — لوحة المسؤول تتطلب صلاحية admin");
     }
   };
+
+  // الطالبة تُوجَّه لصفحتها الخاصة، والمعلمة إلى الدفتر
+  const goAfterLogin = async () => {
+    try {
+      const { data } = await supabase.rpc("my_student_stats");
+      const row = Array.isArray(data) ? data[0] : null;
+      if (row) {
+        navigate({ to: "/my-stats" });
+        return;
+      }
+    } catch {
+      /* تجاهل وتوجيه افتراضي */
+    }
+    navigate({ to: "/" });
+  };
+
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -63,7 +95,7 @@ export function LoginPage() {
           await reportAccess(data.user.id, data.user.email ?? email);
         }
       }
-      navigate({ to: "/" });
+      await goAfterLogin();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "حدث خطأ";
       toast.error(msg);
@@ -81,7 +113,24 @@ export function LoginPage() {
       });
       if (result.error) throw result.error;
       if (result.redirected) return;
-      navigate({ to: "/" });
+      await goAfterLogin();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "حدث خطأ";
+      toast.error(msg);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const signInWithMicrosoft = async () => {
+    setBusy(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("microsoft", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) throw result.error;
+      if (result.redirected) return;
+      await goAfterLogin();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "حدث خطأ";
       toast.error(msg);
@@ -98,7 +147,7 @@ export function LoginPage() {
       });
       if (result.error) throw result.error;
       if (result.redirected) return;
-      navigate({ to: "/" });
+      await goAfterLogin();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "حدث خطأ";
       toast.error(msg);
@@ -168,6 +217,21 @@ export function LoginPage() {
         </div>
 
         <div className="space-y-2">
+          <Button
+            type="button"
+            className="w-full h-14 text-base font-bold bg-[#2F2F2F] text-white hover:bg-[#1f1f1f] shadow-elegant"
+            disabled={busy}
+            onClick={signInWithMicrosoft}
+          >
+            <svg className="ml-2 h-5 w-5" viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="1" y="1" width="10" height="10" fill="#F25022" />
+              <rect x="12" y="1" width="10" height="10" fill="#7FBA00" />
+              <rect x="1" y="12" width="10" height="10" fill="#00A4EF" />
+              <rect x="12" y="12" width="10" height="10" fill="#FFB900" />
+            </svg>
+            الدخول بحساب مايكروسوفت (حساب المدرسة)
+          </Button>
+
           <Button
             type="button"
             variant="outline"
