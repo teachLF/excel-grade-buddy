@@ -171,6 +171,12 @@ export function Dashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="secondary" size="sm" asChild className="bg-white/10 text-primary-foreground hover:bg-white/20 border-white/10">
+              <Link to="/leaderboard">
+                <Trophy className="h-4 w-4 ml-1" /> لوحة الصدارة
+              </Link>
+            </Button>
+
             {isAdmin && (
               <>
                 <Button variant="secondary" size="sm" asChild className="bg-white/10 text-primary-foreground hover:bg-white/20 border-white/10">
