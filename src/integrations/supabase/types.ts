@@ -123,6 +123,7 @@ export type Database = {
           name: string
           order_index: number
           status: string
+          student_email: string | null
           user_id: string
         }
         Insert: {
@@ -132,6 +133,7 @@ export type Database = {
           name: string
           order_index?: number
           status?: string
+          student_email?: string | null
           user_id: string
         }
         Update: {
@@ -141,6 +143,7 @@ export type Database = {
           name?: string
           order_index?: number
           status?: string
+          student_email?: string | null
           user_id?: string
         }
         Relationships: [
@@ -179,6 +182,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      am_i_student: { Args: never; Returns: boolean }
+      current_user_email: { Args: never; Returns: string }
       ensure_my_profile: {
         Args: never
         Returns: {
@@ -194,6 +199,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      event_points: { Args: { _event_type: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -202,6 +208,29 @@ export type Database = {
         Returns: boolean
       }
       is_approved: { Args: { _user_id: string }; Returns: boolean }
+      leaderboard: {
+        Args: never
+        Returns: {
+          display_name: string
+          is_me: boolean
+          rank: number
+          total_points: number
+        }[]
+      }
+      my_student_stats: {
+        Args: never
+        Returns: {
+          absent_count: number
+          escaped_count: number
+          misbehaving_count: number
+          present_count: number
+          sleeping_count: number
+          star_count: number
+          student_name: string
+          talking_count: number
+          total_points: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "user"

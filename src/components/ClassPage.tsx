@@ -35,6 +35,8 @@ import {
   Printer,
   StickyNote,
   Trophy,
+  Laugh,
+  Mail,
 } from "lucide-react";
 import { StudentNotesDialog } from "@/components/StudentNotesDialog";
 import { ClassStatsDialog, pointsFor } from "@/components/ClassStatsDialog";
@@ -43,6 +45,7 @@ type Student = {
   id: string;
   name: string;
   order_index: number;
+  student_email: string | null;
 };
 
 type StudentEvent = {
@@ -54,9 +57,10 @@ type StudentEvent = {
 
 const STATUSES = [
   { key: "star", label: "نجمة", icon: Star, color: "text-yellow-500" },
-  { key: "escaped", label: "مشاغب", icon: Rabbit, color: "text-orange-500" },
+  { key: "escaped", label: "هارب", icon: Rabbit, color: "text-orange-500" },
   { key: "sleeping", label: "نائم", icon: Moon, color: "text-blue-500" },
   { key: "talking", label: "يتحدث", icon: MessageCircle, color: "text-purple-500" },
+  { key: "misbehaving", label: "شاغب", icon: Laugh, color: "text-pink-500" },
 ] as const;
 
 const ATTENDANCE = {
@@ -179,7 +183,7 @@ export function ClassPage({ classId }: { classId: string }) {
     if (cls) setClassName(cls.name);
     const { data, error } = await supabase
       .from("students")
-      .select("id,name,order_index")
+      .select("id,name,order_index,student_email")
       .eq("class_id", classId)
       .order("order_index", { ascending: true });
     if (error) toast.error(error.message);
@@ -283,6 +287,17 @@ export function ClassPage({ classId }: { classId: string }) {
     const { error } = await supabase.from("students").delete().eq("id", id);
     if (error) return toast.error(error.message);
     load();
+  };
+
+  const saveStudentEmail = async (id: string, email: string) => {
+    const value = email.trim().toLowerCase();
+    const { error } = await supabase
+      .from("students")
+      .update({ student_email: value === "" ? null : value })
+      .eq("id", id);
+    if (error) return toast.error(error.message);
+    setStudents((p) => p.map((s) => (s.id === id ? { ...s, student_email: value || null } : s)));
+    toast.success(value ? "تم ربط بريد الطالبة" : "تم حذف البريد");
   };
 
   // ---------- Voice attendance ----------
@@ -472,18 +487,24 @@ export function ClassPage({ classId }: { classId: string }) {
       return {
         "#": i + 1,
         "اسم الطالب": s.name,
+        "البريد الإلكتروني": s.student_email ?? "",
         الحضور: att ? ATTENDANCE[att].label : "",
         نجمة: c.star ?? 0,
-        مشاغب: c.escaped ?? 0,
+        هارب: c.escaped ?? 0,
         نائم: c.sleeping ?? 0,
         يتحدث: c.talking ?? 0,
+        شاغب: c.misbehaving ?? 0,
+        النقاط: pointsFor(s.id, events),
       };
     });
     const ws = XLSX.utils.json_to_sheet(rows);
     ws["!cols"] = [
       { wch: 5 },
       { wch: 30 },
+      { wch: 28 },
       { wch: 10 },
+      { wch: 8 },
+      { wch: 8 },
       { wch: 8 },
       { wch: 8 },
       { wch: 8 },
@@ -510,6 +531,7 @@ export function ClassPage({ classId }: { classId: string }) {
             <td>${c.escaped ?? 0}</td>
             <td>${c.sleeping ?? 0}</td>
             <td>${c.talking ?? 0}</td>
+            <td>${c.misbehaving ?? 0}</td>
             <td><b>${pts > 0 ? "+" + pts : pts}</b></td>
           </tr>`;
       })
@@ -539,7 +561,7 @@ export function ClassPage({ classId }: { classId: string }) {
       <table>
         <thead><tr>
           <th>#</th><th>الطالب</th><th>الحضور</th>
-          <th>نجمة</th><th>مشاغب</th><th>نائم</th><th>يتحدث</th><th>النقاط</th>
+          <th>نجمة</th><th>هارب</th><th>نائم</th><th>يتحدث</th><th>شاغب</th><th>النقاط</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
@@ -765,6 +787,23 @@ export function ClassPage({ classId }: { classId: string }) {
                   <Button variant="ghost" size="icon" onClick={() => removeStudent(s.id)}>
                     <Trash2 className="h-4 w-4 text-muted-foreground" />
                   </Button>
+                </div>
+
+                {/* Student email link */}
+                <div className="flex items-center gap-1.5 mt-2">
+                  <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  <Input
+                    dir="ltr"
+                    type="email"
+                    defaultValue={s.student_email ?? ""}
+                    placeholder="بريد الطالبة الإلكتروني"
+                    className="h-8 text-xs"
+                    onBlur={(e) => {
+                      const v = e.target.value.trim().toLowerCase();
+                      if (v !== (s.student_email ?? "")) saveStudentEmail(s.id, v);
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                  />
                 </div>
 
                 {/* Attendance */}
