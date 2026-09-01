@@ -487,18 +487,24 @@ export function ClassPage({ classId }: { classId: string }) {
       return {
         "#": i + 1,
         "اسم الطالب": s.name,
+        "البريد الإلكتروني": s.student_email ?? "",
         الحضور: att ? ATTENDANCE[att].label : "",
         نجمة: c.star ?? 0,
-        مشاغب: c.escaped ?? 0,
+        هارب: c.escaped ?? 0,
         نائم: c.sleeping ?? 0,
         يتحدث: c.talking ?? 0,
+        شاغب: c.misbehaving ?? 0,
+        النقاط: pointsFor(s.id, events),
       };
     });
     const ws = XLSX.utils.json_to_sheet(rows);
     ws["!cols"] = [
       { wch: 5 },
       { wch: 30 },
+      { wch: 28 },
       { wch: 10 },
+      { wch: 8 },
+      { wch: 8 },
       { wch: 8 },
       { wch: 8 },
       { wch: 8 },
@@ -525,6 +531,7 @@ export function ClassPage({ classId }: { classId: string }) {
             <td>${c.escaped ?? 0}</td>
             <td>${c.sleeping ?? 0}</td>
             <td>${c.talking ?? 0}</td>
+            <td>${c.misbehaving ?? 0}</td>
             <td><b>${pts > 0 ? "+" + pts : pts}</b></td>
           </tr>`;
       })
@@ -554,7 +561,7 @@ export function ClassPage({ classId }: { classId: string }) {
       <table>
         <thead><tr>
           <th>#</th><th>الطالب</th><th>الحضور</th>
-          <th>نجمة</th><th>مشاغب</th><th>نائم</th><th>يتحدث</th><th>النقاط</th>
+          <th>نجمة</th><th>هارب</th><th>نائم</th><th>يتحدث</th><th>شاغب</th><th>النقاط</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
