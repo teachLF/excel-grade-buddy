@@ -42,6 +42,22 @@ export function LoginPage() {
     }
   };
 
+  // الطالبة تُوجَّه لصفحتها الخاصة، والمعلمة إلى الدفتر
+  const goAfterLogin = async () => {
+    try {
+      const { data } = await supabase.rpc("my_student_stats");
+      const row = Array.isArray(data) ? data[0] : null;
+      if (row) {
+        navigate({ to: "/my-stats" });
+        return;
+      }
+    } catch {
+      /* تجاهل وتوجيه افتراضي */
+    }
+    navigate({ to: "/" });
+  };
+
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setBusy(true);
