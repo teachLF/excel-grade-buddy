@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as MyStatsRouteImport } from './routes/my-stats'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SourceRouteImport } from './routes/source'
 import { Route as ClassIdRouteImport } from './routes/class.$id'
@@ -37,6 +38,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MyStatsRoute = MyStatsRouteImport.update({
+  id: '/my-stats',
+  path: '/my-stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
+  '/my-stats': typeof MyStatsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/source': typeof SourceRoute
   '/class/$id': typeof ClassIdRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
+  '/my-stats': typeof MyStatsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/source': typeof SourceRoute
   '/class/$id': typeof ClassIdRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
+  '/my-stats': typeof MyStatsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/source': typeof SourceRoute
   '/class/$id': typeof ClassIdRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/leaderboard'
     | '/login'
+    | '/my-stats'
     | '/sitemap.xml'
     | '/source'
     | '/class/$id'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/leaderboard'
     | '/login'
+    | '/my-stats'
     | '/sitemap.xml'
     | '/source'
     | '/class/$id'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/leaderboard'
     | '/login'
+    | '/my-stats'
     | '/sitemap.xml'
     | '/source'
     | '/class/$id'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   LeaderboardRoute: typeof LeaderboardRoute
   LoginRoute: typeof LoginRoute
+  MyStatsRoute: typeof MyStatsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SourceRoute: typeof SourceRoute
   ClassIdRoute: typeof ClassIdRoute
@@ -151,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/my-stats': {
+      id: '/my-stats'
+      path: '/my-stats'
+      fullPath: '/my-stats'
+      preLoaderRoute: typeof MyStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   LeaderboardRoute: LeaderboardRoute,
   LoginRoute: LoginRoute,
+  MyStatsRoute: MyStatsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SourceRoute: SourceRoute,
   ClassIdRoute: ClassIdRoute,
