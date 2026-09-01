@@ -25,7 +25,7 @@ export function AdminPanel() {
   const [query, setQuery] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved">("pending");
+  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved">("all");
 
   // access control handled by <AdminGuard>
 
@@ -132,7 +132,7 @@ export function AdminPanel() {
               </div>
             </div>
           </div>
-          {(query || fromDate || toDate || statusFilter !== "pending") && (
+          {(query || fromDate || toDate || statusFilter !== "all") && (
             <Button
               variant="ghost"
               size="sm"
@@ -140,7 +140,7 @@ export function AdminPanel() {
                 setQuery("");
                 setFromDate("");
                 setToDate("");
-                setStatusFilter("pending");
+                setStatusFilter("all");
               }}
             >
               مسح التصفية
