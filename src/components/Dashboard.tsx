@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, Plus, Upload, Trash2, Users, Shield, Code2, GraduationCap } from "lucide-react";
+import { LogOut, Plus, Upload, Trash2, Users, Shield, Code2, GraduationCap, Trophy } from "lucide-react";
 
 type ClassRow = { id: string; name: string; created_at: string };
 
