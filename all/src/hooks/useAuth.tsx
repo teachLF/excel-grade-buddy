@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -12,8 +13,18 @@ export function useAuth() {
     const applySession = async (nextSession: Session | null) => {
       if (nextSession) {
         // أكمل إنشاء الملف والدور قبل أن تبدأ الشاشات بطلب بيانات المستخدم.
-        const { error } = await supabase.rpc("ensure_my_profile");
-        if (error) console.error("Profile bootstrap failed", error);
+        try {
+          const { error: profileError } = await supabase.rpc("ensure_my_profile");
+          if (profileError) {
+            console.error("[Auth] Profile bootstrap failed", profileError);
+            if (!active) return;
+            setError(profileError.message);
+          }
+        } catch (err) {
+          console.error("[Auth] Profile bootstrap exception", err);
+          if (!active) return;
+          setError(err instanceof Error ? err.message : "Unknown error");
+        }
       }
       if (!active) return;
       setSession(nextSession);
@@ -32,5 +43,5 @@ export function useAuth() {
     };
   }, []);
 
-  return { session, user: session?.user ?? null, loading };
+  return { session, user: session?.user ?? null, loading, error };
 }

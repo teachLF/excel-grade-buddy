@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { MyStatsPage } from "@/components/MyStatsPage";
+import { MyStatsPage } from "@/components/pages/MyStatsPage";
 
 export const Route = createFileRoute("/my-stats")({
   head: () => ({

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ClassPage } from "@/components/ClassPage";
+import { ClassPage } from "@/components/pages/ClassPage";
 
 export const Route = createFileRoute("/class/$id")({
   component: ClassRoute,

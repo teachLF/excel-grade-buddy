@@ -30,12 +30,23 @@ export function Dashboard() {
     if (!user) return;
     let active = true;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("approved")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (active) setApproved(!!data?.approved);
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("approved")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (!active) return;
+        if (error) {
+          console.error("[Dashboard] Profile query failed", error);
+          toast.error("خطأ في جلب بيانات الملف الشخصي");
+        }
+        setApproved(!!data?.approved);
+      } catch (err) {
+        if (!active) return;
+        console.error("[Dashboard] Profile query exception", err);
+        setApproved(false);
+      }
     })();
     return () => {
       active = false;
@@ -162,7 +173,7 @@ export function Dashboard() {
       <header className="bg-brand-gradient text-primary-foreground">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="grid place-items-center h-10 w-10 rounded-xl bg-white/10 backdrop-blur ring-1 ring-white/15">
+            <div className="grid place-items-center h-10 w-10 rounded-xl bg-primary/20 backdrop-blur ring-1 ring-primary/30">
               <GraduationCap className="h-5 w-5" />
             </div>
             <div>
@@ -171,7 +182,7 @@ export function Dashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="secondary" size="sm" asChild className="bg-white/10 text-primary-foreground hover:bg-white/20 border-white/10">
+            <Button variant="secondary" size="sm" asChild className="bg-primary/20 text-primary-foreground hover:bg-primary/30 border-primary/30">
               <Link to="/leaderboard">
                 <Trophy className="h-4 w-4 ml-1" /> لوحة الصدارة
               </Link>
@@ -179,19 +190,19 @@ export function Dashboard() {
 
             {isAdmin && (
               <>
-                <Button variant="secondary" size="sm" asChild className="bg-white/10 text-primary-foreground hover:bg-white/20 border-white/10">
+                <Button variant="secondary" size="sm" asChild className="bg-primary/20 text-primary-foreground hover:bg-primary/30 border-primary/30">
                   <Link to="/admin">
                     <Shield className="h-4 w-4 ml-1" /> لوحة المسؤول
                   </Link>
                 </Button>
-                <Button variant="secondary" size="sm" asChild className="bg-white/10 text-primary-foreground hover:bg-white/20 border-white/10">
+                <Button variant="secondary" size="sm" asChild className="bg-primary/20 text-primary-foreground hover:bg-primary/30 border-primary/30">
                   <Link to="/source">
                     <Code2 className="h-4 w-4 ml-1" /> أكواد الموقع
                   </Link>
                 </Button>
               </>
             )}
-            <Button variant="secondary" size="sm" onClick={logout} className="bg-white/10 text-primary-foreground hover:bg-white/20 border-white/10">
+            <Button variant="secondary" size="sm" onClick={logout} className="bg-primary/20 text-primary-foreground hover:bg-primary/30 border-primary/30">
               <LogOut className="h-4 w-4 ml-1" /> خروج
             </Button>
           </div>

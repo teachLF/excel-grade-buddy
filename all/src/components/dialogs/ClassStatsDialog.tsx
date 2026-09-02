@@ -151,7 +151,7 @@ export function ClassStatsDialog({
         </div>
 
         {/* Leaderboard */}
-        <div className="border rounded-lg p-4 bg-gradient-to-br from-amber-50 to-yellow-50">
+        <div className="border rounded-lg p-4 bg-gradient-to-br from-amber-900 to-yellow-900">
           <h3 className="font-semibold mb-3 flex items-center gap-2">
             <Trophy className="h-5 w-5 text-amber-500" /> لوحة الشرف (أعلى 10)
           </h3>
@@ -165,7 +165,7 @@ export function ClassStatsDialog({
                   <div
                     key={s.id}
                     className={`flex items-center gap-3 px-3 py-2 rounded-md ${
-                      i < 3 ? "bg-white shadow-sm border border-amber-200" : "bg-white/60"
+                      i < 3 ? "bg-card shadow-sm border border-amber-400" : "bg-card/60"
                     }`}
                   >
                     <span className="w-7 text-center text-lg font-bold">{medal}</span>

@@ -163,7 +163,7 @@ export function LoginPage() {
         <div className="absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-primary/40 blur-3xl" />
       </div>
 
-      <Card className="relative w-full max-w-md p-8 backdrop-blur-xl bg-card/90 border-white/10 shadow-glow">
+      <Card className="relative w-full max-w-md p-8 backdrop-blur-xl bg-card/90 border-primary/20 shadow-glow">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="mb-3 grid place-items-center h-14 w-14 rounded-2xl bg-accent-gradient text-primary-foreground shadow-elegant">
             <GraduationCap className="h-7 w-7" />
@@ -219,7 +219,7 @@ export function LoginPage() {
         <div className="space-y-2">
           <Button
             type="button"
-            className="w-full h-14 text-base font-bold bg-[#2F2F2F] text-white hover:bg-[#1f1f1f] shadow-elegant"
+            className="w-full h-14 text-base font-bold bg-primary/80 text-primary-foreground hover:bg-primary shadow-elegant"
             disabled={busy}
             onClick={signInWithMicrosoft}
           >

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SourceCodeViewer } from "@/components/SourceCodeViewer";
+import { SourceCodeViewer } from "@/components/pages/SourceCodeViewer";
 
 export const Route = createFileRoute("/source")({
   head: () => ({

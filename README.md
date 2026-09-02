@@ -1,26 +1,99 @@
-# Remix of Remix of Student Status Tracker
+# teachLF - متابعة الطلاب والطالبات
 
-موقع فيه تسجيل دخول بحساب ويحفظ انه بنفس الحساب ،، يستقبل اسماء الطلاب بملف اكسل وبعدين المعلم يحط عليه نجمة او هارب او نائم الخ... وكمان بعدها يمديه يصدر الملف ك اكسل
+نظام متقدم لإدارة الفصول ومتابعة حضور وسلوك الطلاب والطالبات مع إمكانية تصدير البيانات.
 
-This project was built with [Lovable](https://lovable.dev).
+## المميزات الرئيسية
 
-**Live app**: https://tamii.lovable.app
+### 📊 إدارة شاملة
+- تسجيل دخول آمن عبر البريد الإلكتروني أو حسابات المؤسسات (Microsoft, Google)
+- إنشاء فصول دراسية وإدارتها بسهولة
+- استيراد أسماء الطلاب من ملفات Excel
+- نظام صلاحيات (معلم عادي ومسؤول)
 
-## Build with Lovable
+### 📈 تتبع الحضور والسلوك
+- تسجيل حالات الحضور والغياب
+- تسجيل الملاحظات السلوكية (نجمة، هارب، نائم، يتحدث، شاغب)
+- ربط بريد الطالب الإلكتروني
+- نظام نقاط متقدم (حاضر +1، نجمة +5، غائب 0، إلخ)
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/01e9776f-71cc-48d3-9114-2f45f9ddc6ff).
+### 🎯 الإحصائيات والتقارير
+- صفحة إحصائيات شخصية للطالب (خاصة)
+- لوحة صدارة عامة بالنقاط (مع حفظ الخصوصية)
+- رسوم بيانية للفصل الواحد
+- تقارير مفصلة للمعلم
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+### 🔐 الأمان والخصوصية
+- جميع البيانات محمية بقاعدة بيانات آمنة (Supabase)
+- الطالب يرى فقط بياناته الخاصة
+- المعلم يرى بيانات طلابه فقط
+- المسؤول لديه صلاحيات إدارية محدودة
 
-## Development
+## المتطلبات
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+- Node.js v18+
+- npm أو yarn
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+## التثبيت والتشغيل
+
+```bash
+# استنساخ المشروع
+git clone <repository-url>
+cd excel-grade-buddy
+
+# تثبيت الحزم
+npm install
+
+# تشغيل بيئة التطوير
 npm run dev
+
+# بناء الإصدار الإنتاجي
+npm run build
+
+# عرض الإصدار الإنتاجي
+npm run preview
 ```
+
+## البنية التقنية
+
+- **الإطار**: React 19 مع TanStack Router
+- **التنميط**: Tailwind CSS
+- **قاعدة البيانات**: Supabase (PostgreSQL)
+- **المصادقة**: Supabase Auth مع دعم OAuth
+- **الخوادم**: TanStack Start (SSR)
+
+## الملفات الرئيسية
+
+```
+src/
+├── components/          # مكونات React الرئيسية
+│   ├── Dashboard.tsx    # لوحة التحكم الرئيسية
+│   ├── ClassPage.tsx    # صفحة الفصل الواحد
+│   ├── LoginPage.tsx    # صفحة تسجيل الدخول
+│   ├── AdminPanel.tsx   # لوحة المسؤول
+│   └── ui/              # مكونات UI أساسية
+├── routes/              # مسارات التطبيق
+├── hooks/               # React Hooks مخصصة
+├── integrations/        # التكامل مع الخدمات الخارجية
+└── lib/                 # دوال مساعدة
+```
+
+## التطوير
+
+```bash
+# فحص الأخطاء
+npm run lint
+
+# تنسيق الكود
+npm run format
+```
+
+## النشر
+
+التطبيق مُضاف في:
+- **Live**: https://tamii.lovable.app
+
+تم بناء هذا المشروع باستخدام [Lovable](https://lovable.dev).
+
+## الترخيص
+
+هذا المشروع خاص وممنوع نسخه بدون إذن.

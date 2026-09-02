@@ -38,8 +38,8 @@ import {
   Laugh,
   Mail,
 } from "lucide-react";
-import { StudentNotesDialog } from "@/components/StudentNotesDialog";
-import { ClassStatsDialog, pointsFor } from "@/components/ClassStatsDialog";
+import { StudentNotesDialog } from "@/components/dialogs/StudentNotesDialog";
+import { ClassStatsDialog, pointsFor } from "@/components/dialogs/ClassStatsDialog";
 
 type Student = {
   id: string;
@@ -175,29 +175,54 @@ export function ClassPage({ classId }: { classId: string }) {
   }, [loading, user, navigate]);
 
   const load = async () => {
-    const { data: cls } = await supabase
-      .from("classes")
-      .select("name")
-      .eq("id", classId)
-      .maybeSingle();
-    if (cls) setClassName(cls.name);
-    const { data, error } = await supabase
-      .from("students")
-      .select("id,name,order_index,student_email")
-      .eq("class_id", classId)
-      .order("order_index", { ascending: true });
-    if (error) toast.error(error.message);
-    else setStudents(data ?? []);
+    try {
+      const { data: cls, error: clsError } = await supabase
+        .from("classes")
+        .select("name")
+        .eq("id", classId)
+        .maybeSingle();
+      if (clsError) {
+        console.error("[ClassPage] Class query failed", clsError);
+        toast.error("خطأ في جلب بيانات الفصل");
+      } else if (cls) {
+        setClassName(cls.name);
+      }
+      
+      const { data, error } = await supabase
+        .from("students")
+        .select("id,name,order_index,student_email")
+        .eq("class_id", classId)
+        .order("order_index", { ascending: true });
+      if (error) {
+        console.error("[ClassPage] Students query failed", error);
+        toast.error(error.message);
+        setStudents([]);
+      } else {
+        setStudents(data ?? []);
+      }
 
-    const ids = (data ?? []).map((s) => s.id);
-    if (ids.length > 0) {
-      const { data: ev } = await supabase
-        .from("student_events")
-        .select("id,student_id,event_type,created_at")
-        .in("student_id", ids)
-        .order("created_at", { ascending: false });
-      setEvents(ev ?? []);
-    } else {
+      const ids = (data ?? []).map((s) => s.id);
+      if (ids.length > 0) {
+        const { data: ev, error: evError } = await supabase
+          .from("student_events")
+          .select("id,student_id,event_type,created_at")
+          .in("student_id", ids)
+          .order("created_at", { ascending: false });
+        if (evError) {
+          console.error("[ClassPage] Events query failed", evError);
+          toast.error("خطأ في جلب الأحداث");
+          setEvents([]);
+        } else {
+          setEvents(ev ?? []);
+        }
+      } else {
+        setEvents([]);
+      }
+    } catch (err) {
+      console.error("[ClassPage] Data loading exception", err);
+      toast.error("حدث خطأ عند تحميل البيانات");
+    }
+  };
       setEvents([]);
     }
   };
@@ -596,7 +621,7 @@ export function ClassPage({ classId }: { classId: string }) {
       : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-background to-background">
+    <div className="min-h-screen bg-gradient-to-b from-indigo-900 via-background to-background">
       <header className="border-b bg-background/80 backdrop-blur sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">

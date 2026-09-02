@@ -19,12 +19,22 @@ export function AdminGuard({ children }: { children: ReactNode }) {
     }
     let active = true;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("approved")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (active) setApproved(data?.approved ?? false);
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("approved")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (!active) return;
+        if (error) {
+          console.error("[AdminGuard] Profile query failed", error);
+        }
+        setApproved(data?.approved ?? false);
+      } catch (err) {
+        if (!active) return;
+        console.error("[AdminGuard] Profile query exception", err);
+        setApproved(false);
+      }
     })();
     return () => {
       active = false;

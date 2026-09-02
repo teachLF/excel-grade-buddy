@@ -12,9 +12,9 @@ type Row = { rank: number; display_name: string; total_points: number; is_me: bo
 const MEDALS: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
 const RANK_STYLE: Record<number, string> = {
-  1: "bg-gradient-to-l from-amber-100 to-yellow-50 border-amber-300",
-  2: "bg-gradient-to-l from-slate-100 to-slate-50 border-slate-300",
-  3: "bg-gradient-to-l from-orange-100 to-amber-50 border-orange-300",
+  1: "bg-gradient-to-l from-amber-900 to-yellow-900 border-amber-600",
+  2: "bg-gradient-to-l from-slate-800 to-slate-900 border-slate-600",
+  3: "bg-gradient-to-l from-orange-900 to-amber-900 border-orange-600",
 };
 
 export function LeaderboardPage() {
@@ -31,10 +31,22 @@ export function LeaderboardPage() {
     if (!user) return;
     let active = true;
     (async () => {
-      const { data, error } = await supabase.rpc("leaderboard");
-      if (!active) return;
-      if (error) toast.error(error.message);
-      setRows(((data ?? []) as Row[]).map((r) => ({ ...r, rank: Number(r.rank) })));
+      try {
+        const { data, error } = await supabase.rpc("leaderboard");
+        if (!active) return;
+        if (error) {
+          console.error("[Leaderboard] Leaderboard query failed", error);
+          toast.error("خطأ في جلب لوحة الصدارة");
+          setRows([]);
+        } else {
+          setRows(((data ?? []) as Row[]).map((r) => ({ ...r, rank: Number(r.rank) })));
+        }
+      } catch (err) {
+        if (!active) return;
+        console.error("[Leaderboard] Leaderboard query exception", err);
+        toast.error("حدث خطأ عند جلب لوحة الصدارة");
+        setRows([]);
+      }
       setReady(true);
     })();
     return () => {
@@ -47,7 +59,7 @@ export function LeaderboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-background to-background">
+    <div className="min-h-screen bg-gradient-to-b from-amber-900 via-background to-background">
       <header className="border-b bg-background/80 backdrop-blur sticky top-0 z-30">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-2">
           <Link to="/" className="text-muted-foreground hover:text-foreground shrink-0">

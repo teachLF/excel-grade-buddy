@@ -21,9 +21,9 @@ type Note = {
 };
 
 const KINDS = [
-  { key: "general", label: "ملاحظة", icon: MessageSquare, color: "text-slate-600 bg-slate-100" },
-  { key: "academic", label: "أكاديمي", icon: BookOpen, color: "text-blue-600 bg-blue-100" },
-  { key: "behavior", label: "سلوكي", icon: AlertTriangle, color: "text-amber-600 bg-amber-100" },
+  { key: "general", label: "ملاحظة", icon: MessageSquare, color: "text-slate-300 bg-slate-700" },
+  { key: "academic", label: "أكاديمي", icon: BookOpen, color: "text-blue-300 bg-blue-900" },
+  { key: "behavior", label: "سلوكي", icon: AlertTriangle, color: "text-amber-300 bg-amber-900" },
 ] as const;
 
 export function StudentNotesDialog({
@@ -45,13 +45,24 @@ export function StudentNotesDialog({
 
   const load = async () => {
     if (!studentId) return;
-    const { data, error } = await (supabase as any)
-      .from("student_notes")
-      .select("id,body,kind,created_at")
-      .eq("student_id", studentId)
-      .order("created_at", { ascending: false });
-    if (error) toast.error(error.message);
-    else setNotes((data as Note[]) ?? []);
+    try {
+      const { data, error } = await (supabase as any)
+        .from("student_notes")
+        .select("id,body,kind,created_at")
+        .eq("student_id", studentId)
+        .order("created_at", { ascending: false });
+      if (error) {
+        console.error("[StudentNotes] Notes query failed", error);
+        toast.error("خطأ في جلب الملاحظات");
+        setNotes([]);
+      } else {
+        setNotes((data as Note[]) ?? []);
+      }
+    } catch (err) {
+      console.error("[StudentNotes] Notes query exception", err);
+      toast.error("حدث خطأ عند جلب الملاحظات");
+      setNotes([]);
+    }
   };
 
   useEffect(() => {
@@ -66,23 +77,43 @@ export function StudentNotesDialog({
   const add = async () => {
     if (!body.trim() || !user || !studentId) return;
     setBusy(true);
-    const { error } = await (supabase as any).from("student_notes").insert({
-      student_id: studentId,
-      user_id: user.id,
-      body: body.trim(),
-      kind,
-    });
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    setBody("");
-    load();
-    toast.success("تم إضافة الملاحظة");
+    try {
+      const { error } = await (supabase as any).from("student_notes").insert({
+        student_id: studentId,
+        user_id: user.id,
+        body: body.trim(),
+        kind,
+      });
+      if (error) {
+        console.error("[StudentNotes] Insert failed", error);
+        toast.error(error.message);
+      } else {
+        setBody("");
+        await load();
+        toast.success("تم إضافة الملاحظة");
+      }
+    } catch (err) {
+      console.error("[StudentNotes] Insert exception", err);
+      toast.error("حدث خطأ عند إضافة الملاحظة");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const remove = async (id: string) => {
-    const { error } = await (supabase as any).from("student_notes").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    setNotes((p) => p.filter((n) => n.id !== id));
+    try {
+      const { error } = await (supabase as any).from("student_notes").delete().eq("id", id);
+      if (error) {
+        console.error("[StudentNotes] Delete failed", error);
+        toast.error(error.message);
+      } else {
+        setNotes((p) => p.filter((n) => n.id !== id));
+        toast.success("تم حذف الملاحظة");
+      }
+    } catch (err) {
+      console.error("[StudentNotes] Delete exception", err);
+      toast.error("حدث خطأ عند حذف الملاحظة");
+    }
   };
 
   return (

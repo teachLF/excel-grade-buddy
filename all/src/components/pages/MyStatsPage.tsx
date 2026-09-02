@@ -20,13 +20,13 @@ type Stats = {
 };
 
 const CARDS = [
-  { key: "present_count", label: "حضور", emoji: "✅", tone: "bg-emerald-50 text-emerald-700" },
-  { key: "absent_count", label: "غياب", emoji: "❌", tone: "bg-rose-50 text-rose-700" },
-  { key: "star_count", label: "نجمة", emoji: "⭐", tone: "bg-amber-50 text-amber-700" },
-  { key: "sleeping_count", label: "نوم", emoji: "😴", tone: "bg-blue-50 text-blue-700" },
-  { key: "escaped_count", label: "هروب", emoji: "🏃‍♀️", tone: "bg-orange-50 text-orange-700" },
-  { key: "talking_count", label: "تحدّث", emoji: "🗣️", tone: "bg-purple-50 text-purple-700" },
-  { key: "misbehaving_count", label: "شغب", emoji: "🤪", tone: "bg-pink-50 text-pink-700" },
+  { key: "present_count", label: "حضور", emoji: "✅", tone: "bg-emerald-900 text-emerald-200" },
+  { key: "absent_count", label: "غياب", emoji: "❌", tone: "bg-rose-900 text-rose-200" },
+  { key: "star_count", label: "نجمة", emoji: "⭐", tone: "bg-amber-900 text-amber-200" },
+  { key: "sleeping_count", label: "نوم", emoji: "😴", tone: "bg-blue-900 text-blue-200" },
+  { key: "escaped_count", label: "هروب", emoji: "🏃‍♀️", tone: "bg-orange-900 text-orange-200" },
+  { key: "talking_count", label: "تحدّث", emoji: "🗣️", tone: "bg-purple-900 text-purple-200" },
+  { key: "misbehaving_count", label: "شغب", emoji: "🤪", tone: "bg-pink-900 text-pink-200" },
 ] as const;
 
 export function MyStatsPage() {
@@ -43,11 +43,23 @@ export function MyStatsPage() {
     if (!user) return;
     let active = true;
     (async () => {
-      const { data, error } = await supabase.rpc("my_student_stats");
-      if (!active) return;
-      if (error) toast.error(error.message);
-      const row = Array.isArray(data) ? (data[0] as Stats | undefined) : undefined;
-      setStats(row ?? null);
+      try {
+        const { data, error } = await supabase.rpc("my_student_stats");
+        if (!active) return;
+        if (error) {
+          console.error("[MyStats] Stats query failed", error);
+          toast.error("خطأ في جلب الإحصائيات");
+          setStats(null);
+        } else {
+          const row = Array.isArray(data) ? (data[0] as Stats | undefined) : undefined;
+          setStats(row ?? null);
+        }
+      } catch (err) {
+        if (!active) return;
+        console.error("[MyStats] Stats query exception", err);
+        toast.error("حدث خطأ عند جلب بياناتك");
+        setStats(null);
+      }
       setReady(true);
     })();
     return () => {
@@ -67,7 +79,7 @@ export function MyStatsPage() {
   const notLinked = !stats || stats.student_name === null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-background to-background">
+    <div className="min-h-screen bg-gradient-to-b from-indigo-900 via-background to-background">
       <header className="border-b bg-background/80 backdrop-blur sticky top-0 z-30">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
